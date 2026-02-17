@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
 
 const GameSchema = new mongoose.Schema({
   nome: {
@@ -25,4 +25,4 @@ const GameSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Game", GameSchema);
+export default mongoose.model("Game", GameSchema);

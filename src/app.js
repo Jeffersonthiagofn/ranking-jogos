@@ -1,6 +1,6 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const authRoutes = require('./routes/auth'); // Importa as rotas que criamos
+import express from 'express';
+import mongoose from 'mongoose';
+import authRoutes from './routes/auth.js';
 
 const app = express();
 
