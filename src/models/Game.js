@@ -1,28 +1,31 @@
 import mongoose from 'mongoose';
 
 const GameSchema = new mongoose.Schema({
-  nome: {
-    type: String,
-    required: true,
-  },
-  descricao: {
-    type: String,
-    required: true,
-  },
-  genero: {
-    type: String,
-    required: true,
-  },
-  dataLancamento: {
-    type: Date,
-  },
-  desenvolvedor: {
-    type: String,
-  },
-  popularidade: {
+  appid: {
     type: Number,
-    default: 0,
+    required: true,
+    unique: true
   },
+  
+  name: {
+    type: String,
+    required: true
+  },
+
+  thumbnail: {
+    type: String
+  },
+
+  status: {
+    type: String,
+    enum: ['pending', 'detailed', 'erro'],
+    default: 'pending'
+  },
+
+  ranking_data: {
+    positive_votes: {type: Number, default: 0},
+    score: {type: Number, default: 0}
+  }
 });
 
-export default mongoose.model("Game", GameSchema);
+export const Game = mongoose.model("Game", GameSchema);

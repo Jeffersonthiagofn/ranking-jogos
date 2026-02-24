@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import authRoutes from './routes/auth.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 
@@ -10,16 +11,22 @@ app.use(express.json());
 // 2. Definir as rotas
 app.use('/api/auth', authRoutes);
 
-// Rota de teste simples
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+// Conection with the data base
+const url = process.env.MONGO_URL;
 
-// Conexão com o Banco de Dados
-mongoose.connect('mongodb+srv://adm:12345@rankingjogos.kjqlke7.mongodb.net/?appName=RankingJogos')
-  .then(() => console.log('Conectado ao MongoDB!'))
-  .catch((err) => console.error('Erro ao conectar ao MongoDB:', err));
+// Stop the app if the database URL is missing
+if (!url) {
+  console.error("Error: MONGO_URL is not defined in the environment variables.");
+  process.exit(1);
+}
 
-app.listen(3000, () => {
-  console.log('Servidor rodando em http://localhost:3000');
+mongoose.connect(url)
+  .then(() => console.log('Successfully connected to MongoDB'))
+  .catch((err) => console.error('Database connection error:', err));
+
+app.use('/admin', adminRoutes);
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server is awake and listening on port ${PORT}`);
 });
