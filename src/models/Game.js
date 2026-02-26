@@ -16,6 +16,12 @@ const GameSchema = new mongoose.Schema({
     type: String
   },
 
+  achievements: [{
+    name: String,
+    description: String,
+    icon: String
+  }],
+
   status: {
     type: String,
     enum: ['pending', 'detailed', 'erro'],
