@@ -2,8 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cron from 'node-cron';
 import authRoutes from './routes/auth.js';
-import adminRoutes from './routes/adminRoutes.js';
-import { updateGameDetails } from './services/steamService.js';
+import adminRoutes from './routes/adminRoutes.js';  
+import { updateGameDetails, queueStaleGames, autoIngestIfEmpty } from './services/steamService.js';
 
 const app = express();
 app.use(express.json());
@@ -18,9 +18,11 @@ if (!url) {
 }
 
 mongoose.connect(url)
-  .then(() => {
+  .then(async () => {
     console.log('Successfully connected to MongoDB');
     
+    await autoIngestIfEmpty();
+
     console.log('Server started! Running initial game detail update...');
     updateGameDetails(); 
   })
@@ -29,6 +31,11 @@ mongoose.connect(url)
 cron.schedule('*/2 * * * *', () => {
     console.log('Cron triggered: Fetching the next batch of games...');
     updateGameDetails();
+});
+
+cron.schedule('0 3 * * *', () => {
+    console.log('Running daily sweep for stale games...');
+    queueStaleGames();
 });
 
 const PORT = process.env.PORT || 8080;

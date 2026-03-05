@@ -1,6 +1,15 @@
 import {Game} from '../models/Game.js';
 import axios from 'axios';
 
+
+export const STEAM_CONFIG = {
+  MAX_RESULTS: 100000,
+  HEALTH_THRESHOLD: 80000 
+};
+
+// Create global padlock
+let isUpdating = false;
+
 export const importBaseList = async (gameList) =>{
     const BATCH_SIZE = 1000;
     let processed = 0;
@@ -30,8 +39,55 @@ export const importBaseList = async (gameList) =>{
     return processed;
 };
 
-// Create global padlock
-let isUpdating = false;
+export const autoIngestIfEmpty = async () => {
+  try {
+    const count = await Game.countDocuments();
+    
+    if (count > STEAM_CONFIG.HEALTH_THRESHOLD) {
+      console.log(`Database already contains ${count} games. Skipping initial ingestion.`);
+      return { status: 'skipped', count };
+    }
+
+    console.log('Database is empty! Fetching the initial Steam ID list...');
+    
+    const apiKey = process.env.STEAM_API_KEY;
+
+    let moreResults = true;
+    let lastAppId = 0;
+    let totalSavedAllPages = 0;
+
+    while (moreResults) {
+      
+      const url = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${apiKey}&max_results=${STEAM_CONFIG.MAX_RESULTS}&last_appid=${lastAppId}`;
+      const response = await axios.get(url);
+      const data = response.data.response
+
+      if (data.apps && data.apps.length > 0) {
+        console.log(`Downloading a page of ${data.apps.length} games. Saving to database...`);
+
+        const savedThisPage = await importBaseList(data.apps);
+        totalSavedAllPages += savedThisPage;
+      }
+
+      if (data.have_more_results && data.last_appid) {
+        lastAppId = data.last_appid;
+        console.log(`Fetching the next page starting after AppID ${lastAppId}...`);
+        
+        await new Promise(resolve => setTimeout(resolve, 1000)); 
+      } else {
+        moreResults = false;
+      }
+    }
+
+    console.log(`Complete database seeding finished! Total games processed: ${totalSavedAllPages}`);
+
+    return { status: 'completed', count: totalSavedAllPages };
+
+  } catch (err) {
+    console.error('Error during auto-ingestion:', err.message);
+    throw err;
+  }
+};
 
 export const updateGameDetails = async () => {
   if (isUpdating) {
@@ -60,7 +116,25 @@ export const updateGameDetails = async () => {
 
         if (gameData && gameData.success) {
           const details = gameData.data;
+          
           game.thumbnail = details.header_image;
+          game.description = details.short_description || '';
+          game.developer = details.developers ? details.developers[0] : 'Unknown';
+          game.genres = details.genres ? details.genres.map(g => g.description) : [];
+
+          if (details.is_free) {
+            game.is_free = true;
+            game.price = 'Free to Play';
+          } else if (details.price_overview) {
+            game.is_free = false;
+            game.price = details.price_overview.final_formatted;
+          }
+
+          if (details.release_date && !details.release_date.coming_soon) {
+            game.release_date = details.release_date.date;
+          } else {
+            game.release_date = 'TBA';
+          }
 
           try {
             const apiKey = process.env.STEAM_API_KEY;
@@ -80,7 +154,57 @@ export const updateGameDetails = async () => {
              console.log(`   -> No achievements found for ${game.name}.`);
           }
 
+          try {
+            const playerUrl = `https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${game.appid}`;
+            const playerResponse = await axios.get(playerUrl);
+            
+            if (playerResponse.data.response && playerResponse.data.response.result === 1) {
+              const currentCount = playerResponse.data.response.player_count || 0; 
+              game.current_players = currentCount;
+              
+              if (currentCount > (game.all_time_peak || 0)) {
+                game.all_time_peak = currentCount;
+              }
+
+              game.player_history.push({
+                timestamp: new Date(),
+                player_count: currentCount
+              });
+
+              console.log(`   -> Current players: ${currentCount} | Peak: ${game.all_time_peak}`);
+            }
+          } catch (playerErr) {
+            console.log(`   -> Could not fetch active players for ${game.name}.`);
+            game.current_players = 0;
+          }
+
+          try {
+            const reviewUrl = `https://store.steampowered.com/appreviews/${game.appid}?json=1&language=all`;
+            const reviewResponse = await axios.get(reviewUrl);
+            const summary = reviewResponse.data.query_summary;
+
+            if (summary && summary.total_reviews > 0) {
+              const total = summary.total_reviews;
+              const positive = summary.total_positive;
+              
+              const percentageScore = Math.round((positive / total) * 100);
+
+              game.ranking_data = {
+                positive_votes: positive,
+                score: percentageScore
+              };
+              
+              console.log(`   -> Rating: ${percentageScore}% Positive (${positive} upvotes)`);
+            } else {
+              console.log(`   -> No reviews found for ${game.name}.`);
+            }
+          } catch (reviewErr) {
+            console.log(`   -> Could not fetch reviews for ${game.name}.`);
+          }
+
           game.status = 'detailed';
+          game.last_updated = new Date();
+
         } else {
           game.status = 'erro'; 
         }
@@ -92,6 +216,8 @@ export const updateGameDetails = async () => {
 
       } catch (err) {
         console.error(`Error fetching details for ${game.name}:`, err.message);
+        game.status = 'erro'; 
+        await game.save();
       }
     }
 
@@ -101,5 +227,23 @@ export const updateGameDetails = async () => {
     console.error('Database error in updateGameDetails:', error);
   } finally {
     isUpdating = false; 
+  }
+};
+
+export const queueStaleGames = async () => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const result = await Game.updateMany(
+      { status: 'detailed', last_updated: { $lt: thirtyDaysAgo } },
+      { $set: { status: 'pending' } }
+    );
+
+    if (result.modifiedCount > 0) {
+      console.log(`Sweeper: Sent ${result.modifiedCount} stale games back to the pending queue.`);
+    }
+  } catch (error) {
+    console.error('Error queuing stale games:', error);
   }
 };
