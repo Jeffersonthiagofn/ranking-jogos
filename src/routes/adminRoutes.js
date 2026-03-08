@@ -1,6 +1,6 @@
 import express from 'express';
 import { autoIngestIfEmpty } from '../services/steamService.js';
-import { requireAdminSecret } from '../middleware/adminAuth.js'; 
+import { requireAdminSecret } from '../middlewares/adminAuth.js';
 
 const router = express.Router();
 
