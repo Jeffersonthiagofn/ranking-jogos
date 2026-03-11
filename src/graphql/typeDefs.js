@@ -1,17 +1,49 @@
 export const typeDefs = `#graphql
-  # resposta do login
-  type AuthPayload {
-    msg: String!
-    token: String!
-  }
+  
+#Define the shapes of our MongoDB models
+type Achievement {
+  name: String
+  description: String
+  icon: String
+  completion_percentage: Float
+}
 
-  # O GraphQL exige pelo menos uma Query (consulta) para funcionar
-  type Query {
-    hello: String
-  }
+type Game {
+  appid: Int!
+  name: String!
+  achievements: [Achievement]
+}
 
-  type Mutation {
-    register(nome: String!, email: String!, senha: String!): String!
-    login(email: String!, senha: String!): AuthPayload!
-  }
+type OwnedGame {
+  appid: Int!
+  playtime_forever: Int
+  gameDetails: Game 
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  steamId: String
+  avatar: String
+  ownedGames: [OwnedGame]
+}
+
+type Query {
+  getUser(id: ID!): User  
+  getGames(limit: Int, offset: Int): [Game]
+  getGameAchievements(appid: Int!): [Achievement]
+}
+
+#Login Responses
+type AuthPayload {
+  msg: String!
+  token: String!
+}
+
+type Mutation {
+  register(name: String!, email: String!, password: String!): String
+  login(email: String!, password: String!): AuthPayload
+  syncMyLibrary: String!
+}
 `;

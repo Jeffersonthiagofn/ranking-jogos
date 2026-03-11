@@ -56,23 +56,30 @@ export const autoIngestIfEmpty = async () => {
     let lastAppId = 0;
     let totalSavedAllPages = 0;
 
-    while (moreResults) {
+    while (moreResults && totalSavedAllPages < STEAM_CONFIG.MAX_RESULTS) {
       
-      const url = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${apiKey}&max_results=${STEAM_CONFIG.MAX_RESULTS}&last_appid=${lastAppId}`;
+      const url = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${apiKey}&max_results=50000&last_appid=${lastAppId}`;
       const response = await axios.get(url);
-      const data = response.data.response
+      const data = response.data.response;
 
-      if (data.apps && data.apps.length > 0) {
-        console.log(`Downloading a page of ${data.apps.length} games. Saving to database...`);
+      let appsToSave = data.apps || [];
 
-        const savedThisPage = await importBaseList(data.apps);
+      if (totalSavedAllPages + appsToSave.length > STEAM_CONFIG.MAX_RESULTS) {
+        const remainingSlots = STEAM_CONFIG.MAX_RESULTS - totalSavedAllPages;
+        appsToSave = appsToSave.slice(0, remainingSlots);
+        moreResults = false;
+        console.log(`Reached the MAX_RESULTS limit of ${STEAM_CONFIG.MAX_RESULTS}. Truncating final batch...`);
+      }
+
+      if (appsToSave.length > 0) {
+        console.log(`Downloading a page of ${appsToSave.length} games. Saving to database...`);
+        const savedThisPage = await importBaseList(appsToSave);
         totalSavedAllPages += savedThisPage;
       }
 
-      if (data.have_more_results && data.last_appid) {
+      if (moreResults && data.have_more_results && data.last_appid) {
         lastAppId = data.last_appid;
         console.log(`Fetching the next page starting after AppID ${lastAppId}...`);
-        
         await new Promise(resolve => setTimeout(resolve, 1000)); 
       } else {
         moreResults = false;
@@ -138,20 +145,42 @@ export const updateGameDetails = async () => {
 
           try {
             const apiKey = process.env.STEAM_API_KEY;
-            const schemaUrl = `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${apiKey}&appid=${game.appid}`;
+            const schemaUrl = `https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${apiKey}&appid=${game.appid}`;
             const schemaResponse = await axios.get(schemaUrl);
             const stats = schemaResponse.data.game?.availableGameStats;
 
             if (stats && stats.achievements) {
-              game.achievements = stats.achievements.map(ach => ({
-                name: ach.displayName,
-                description: ach.description || '',
-                icon: ach.icon
-              }));
-              console.log(`   -> Found ${game.achievements.length} achievements for ${game.name}`);
+              
+              let percentagesMap = {};
+              try {
+                const pctUrl = `https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=${game.appid}`;
+                const pctResponse = await axios.get(pctUrl);
+                const pctList = pctResponse.data.achievementpercentages?.achievements || [];
+                
+                pctList.forEach(p => {
+                  percentagesMap[p.name] = p.percent;
+                });
+              } catch (pctErr) {
+                console.log(`   -> Could not fetch achievement percentages for ${game.name}.`);
+              }
+
+              game.achievements = stats.achievements.map(ach => {
+
+                const rawPercent = Number(percentagesMap[ach.name]) || 0; 
+                
+                return {
+                  name: ach.displayName,
+                  description: ach.description || '',
+                  icon: ach.icon,
+                  
+                  completion_percentage: Number(rawPercent.toFixed(1)) 
+                };
+              });
+
+              console.log(`   -> Found ${game.achievements.length} achievements with % stats for ${game.name}`);
             }
           } catch (schemaErr) {
-             console.log(`   -> No achievements found for ${game.name}.`);
+             console.log(`   -> Failed to fetch achievements for ${game.name}: ${schemaErr.message}`);
           }
 
           try {
