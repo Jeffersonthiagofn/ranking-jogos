@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import { Game } from '../models/Game.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -43,6 +44,12 @@ export const resolvers = {
       }
     },
 
+  Game: {
+      thumb: (parent) => {
+        return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/header.jpg`;
+      }
+    },
+
   Mutation: {
     login: async (_, { email, password }) => {
       const user = await User.findOne({ email });
@@ -71,23 +78,63 @@ export const resolvers = {
       const user = await User.findById(context.user.id);
       if (!user.steamId) throw new Error("No Steam account linked!");
 
-      const url = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${user.steamId}&format=json`;
-      
-      const response = await fetch(url);
-      const data = await response.json();
+      const gamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${user.steamId}&format=json`;
+      const gamesRes = await fetch(gamesUrl);
+      const gamesData = await gamesRes.json();
 
-      if (!data.response || !data.response.games) {
+      if (!gamesData.response || !gamesData.response.games) {
         throw new Error("Could not fetch games from Steam");
       }
 
-      user.ownedGames = data.response.games.map(game => ({
+      let ownedGames = gamesData.response.games.map(game => ({
         appid: game.appid,
-        playtime_forever: game.playtime_forever
+        playtime_forever: game.playtime_forever,
+        completed_achievements: 0,
+        total_achievements: 0,
+        unlocked_achievements: []
       }));
 
+      const chunkSize = 50;
+      
+      for (let i = 0; i < ownedGames.length; i += chunkSize) {
+        const chunk = ownedGames.slice(i, i + chunkSize);
+        
+        let achUrl = `https://api.steampowered.com/IPlayerService/GetTopAchievementsForGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.steamId}&max_achievements=10000`;
+        
+        chunk.forEach((game, index) => {
+          achUrl += `&appids[${index}]=${game.appid}`;
+        });
+
+        try {
+          const achRes = await fetch(achUrl);
+          const achData = await achRes.json();
+
+          if (achData.response && achData.response.games) {
+            achData.response.games.forEach(achGame => {
+              const targetGame = ownedGames.find(g => g.appid === achGame.appid);
+              if (targetGame) {
+                targetGame.total_achievements = achGame.total_achievements || 0;
+                
+                if (achGame.achievements) {
+                  targetGame.completed_achievements = achGame.achievements.length;
+                  targetGame.unlocked_achievements = achGame.achievements.map(ach => ach.name);
+
+                } else {
+                  targetGame.completed_achievements = 0;
+                  targetGame.unlocked_achievements = [];
+                }
+              }
+            });
+          }
+        } catch (err) {
+          console.error(`Error fetching achievement chunk starting at index ${i}:`, err);
+        }
+      }
+
+      user.ownedGames = ownedGames;
       await user.save();
       
-      return "Library synced successfully!";
+      return "Library and achievement stats synced successfully!";
     },
 
     register: async (_, { name, email, password }) => {

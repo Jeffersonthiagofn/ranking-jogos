@@ -124,7 +124,6 @@ export const updateGameDetails = async () => {
         if (gameData && gameData.success) {
           const details = gameData.data;
           
-          game.thumbnail = details.header_image;
           game.description = details.short_description || '';
           game.developer = details.developers ? details.developers[0] : 'Unknown';
           game.genres = details.genres ? details.genres.map(g => g.description) : [];

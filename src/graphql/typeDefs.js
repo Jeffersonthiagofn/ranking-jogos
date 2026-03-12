@@ -11,12 +11,16 @@ type Achievement {
 type Game {
   appid: Int!
   name: String!
+  thumb: String
   achievements: [Achievement]
 }
 
 type OwnedGame {
   appid: Int!
   playtime_forever: Int
+  completed_achievements: Int
+  total_achievements: Int
+  unlocked_achievements: [String]
   gameDetails: Game 
 }
 
