@@ -11,10 +11,6 @@ const GameSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  
-  thumbnail: {
-    type: String
-  },
 
   description: { 
     type: String 
@@ -35,7 +31,8 @@ const GameSchema = new mongoose.Schema({
   achievements: [{
     name: String,
     description: String,
-    icon: String
+    icon: String,
+    completion_percentage: { type: Number, default: 0 }
   }],
 
   current_players: { 
