@@ -1,238 +1,158 @@
-Steam Data Ingestion Engine
+# Steam Data Ingestion Engine & GraphQL API
 
-A highly resilient automated backend pipeline designed to fetch, store, and continuously enrich data for the entire Steam catalog.
-Built with Node.js, Express, MongoDB, and GraphQL, the system supports large-scale ingestion (150k+ apps) and user Steam library synchronization.
+A highly resilient, automated backend pipeline designed to fetch, store, and continuously enrich data for the entire Steam catalog using Node.js, Express, and MongoDB, fully integrated with a GraphQL API for user library synchronization.
 
-Overview
+## Overview
 
-The system operates in three main phases:
+This service operates in three main phases:
 
-1. Initial Seeding
+1. Initial Seeding  
+   Detects if the database is empty or partially populated, then dynamically pages through the Steam API to ingest all existing application IDs (150,000+ records) with built-in crash recovery.
 
-When the server starts, the system checks if the database is empty or partially populated.
+2. Continuous Enrichment  
+   A background worker iteratively processes batches of pending games, communicating with multiple Steam endpoints to fetch pricing, live player counts, achievements, and review scores, while strictly adhering to API rate limits.
 
-If required, it:
+3. User Library Integration  
+   Authenticated users can link their Steam accounts to seamlessly fetch and synchronize their personal game libraries, playtime data, and achievements via GraphQL.
 
-Dynamically pages through the Steam API
+## Core Features
 
-Retrieves all available Steam application IDs (150,000+)
+- Self-Healing Ingestion  
+  Uses threshold checks and unordered MongoDB bulk inserts to seamlessly resume operations if the server crashes mid-ingestion.
 
-Inserts records in batches
+- Fault-Tolerant Enrichment  
+  Wraps external API calls in granular try/catch blocks ensuring that partial data (for example missing reviews) does not halt the processing of other valid data (for example pricing).
 
-Supports automatic crash recovery
+- Rate Limit Management  
+  Implements asynchronous delays and batch limits to prevent IP blacklisting from Valve's servers.
 
-2. Continuous Enrichment
+- Secured Endpoints  
+  Protects administrative triggers using custom header-based middleware.
 
-A background worker continuously processes pending game records and enriches them with additional data from multiple Steam endpoints:
+- GraphQL API  
+  Provides a strictly typed interface for user authentication, Steam profile linking, and library synchronization.
 
-Pricing information
+## Tech Stack
 
-Live player counts
+Runtime: Node.js  
+Framework: Express.js  
+API Layer: GraphQL (Apollo Server)  
+Database: MongoDB (via Mongoose)  
+HTTP Client: Node Fetch / Axios  
+Infrastructure: Docker & Docker Compose
 
-Achievements
+---
 
-Review scores
+## How to Lift the Application
 
-The system includes:
+### 1. Environment Variables
 
-Strict API rate limit management
+Create a `.env` file in the root directory of the project and add the following keys:
 
-Fault-tolerant data collection
-
-Batch processing to prevent request overload
-
-3. User Library Integration
-
-Authenticated users can link their Steam accounts to:
-
-Fetch their owned games
-
-Synchronize playtime data
-
-Store their library inside the platform database
-
-This enables user-specific analytics and profile features.
-
-Core Features
-Self-Healing Ingestion
-
-Uses threshold checks to detect incomplete ingestion
-
-Performs unordered MongoDB bulk inserts
-
-Automatically resumes ingestion after server crashes
-
-Fault-Tolerant Enrichment
-
-External API requests are wrapped in granular try/catch blocks.
-
-Example:
-
-If the reviews endpoint fails, the system can still save:
-
-pricing data
-
-player counts
-
-achievements
-
-This ensures one failing endpoint does not halt the pipeline.
-
-Rate Limit Management
-
-To prevent Steam API throttling or IP bans:
-
-Requests are processed in controlled batches
-
-Asynchronous delays between calls
-
-Worker queue limits are enforced
-
-Secured Administrative Endpoints
-
-Administrative triggers are protected using custom header-based authentication middleware.
-
-Only requests containing the correct secret can execute ingestion commands.
-
-GraphQL API
-
-A fully typed GraphQL layer handles user-facing functionality:
-
-Authentication
-
-Steam profile linking
-
-Library synchronization
-
-User profile queries
-
-Tech Stack
-Layer	Technology
-Runtime	Node.js
-Framework	Express.js
-API Layer	GraphQL (Apollo Server)
-Database	MongoDB
-ODM	Mongoose
-HTTP Client	Axios / Node Fetch
-Infrastructure	Docker + Docker Compose
-Environment Variables
-
-Create a .env file in the project root:
-
+env
 STEAM_API_KEY=your_steam_api_key_here
 ADMIN_SECRET=your_secure_admin_password
-JWT_SECRET=your_jwt_signing_secret_here
+JWT_SECRET=your_super_secret_jwt_key
 MONGO_URI=mongodb://mongo:27017/steam_db
 PORT=3000
-API Endpoints
-Administrative Routes (REST)
 
-These routes require the header:
+## How to Lift the Application
 
-x-admin-secret: ADMIN_SECRET
-GET /admin/ingest-steam-ids
+### 2. Start with Docker (Recommended)
 
-Description
+The application is fully containerized. To start the database and the Node.js server simultaneously, run:
 
-Manually triggers the ingestion process.
-
-The system:
-
-Checks database health
-
-Determines if ingestion is required
-
-Processes Steam application IDs
-
-Response Example
-
-{
-  "status": "completed",
-  "processedRecords": 150432
-}
-
-Possible statuses:
-
-completed
-
-skipped (database already populated)
-
-GraphQL Operations
-
-The GraphQL API powers all user-facing functionality.
-
-Mutation: SyncLibrary
-
-Synchronizes a user's Steam library.
-
-Requirements
-
-Valid JWT in the Authorization header
-
-Behavior
-
-Calls Steam's GetOwnedGames
-
-Fetches:
-
-owned games
-
-playtime
-
-Updates the user profile in the database
-
-Query: GetFullProfile
-
-Fetches a public user profile.
-
-Parameters
-
-id: ID!
-
-Returns
-
-User information
-
-Synced Steam library
-
-Total playtime
-
-Running the Application
-
-The entire system is fully containerized.
-
-Start all services with:
-
+bash
 docker compose up --build
 
-This will start:
+The server will automatically detect an empty database and begin the seeding process upon initialization.
 
-MongoDB container
+The GraphQL Playground will be available at your configured Apollo endpoint (for example http://localhost:3000/graphql
+).
 
-Node.js backend server
+API Endpoints and Operations
+Administrative Routes (REST)
 
-Automatic Startup Behavior
+Requires the x-admin-secret header to match the ADMIN_SECRET environment variable.
 
-When the server launches, it automatically:
+GET /admin/ingest-steam-ids
 
-Checks the database state
+Description:
+Manually triggers the database health check and ingestion process.
 
-Detects missing Steam data
+Response:
+Returns a JSON object detailing the status (skipped or completed) and the number of processed records.
 
-Starts the initial seeding process
+GraphQL API Documentation
+Authentication Mutations
 
-No manual ingestion is required if the database is empty.
+1. Register a New User
 
-System Design Principles
+Creates a new account in MongoDB with a hashed password.
 
-This project was built with the following goals:
+mutation Register {
+  register(name: "John Doe", email: "john@test.com", password: "securepassword123")
+}
 
-Resilience — the pipeline recovers from crashes automatically
+2. Login
 
-Scalability — handles 150k+ Steam applications
+Authenticates the user and returns a JWT token. You must include this token in the Authorization header for protected routes.
 
-Fault tolerance — individual API failures do not break processing
+mutation Login {
+  login(email: "john@test.com", password: "securepassword123") {
+    msg
+    token
+  }
+}
+Protected User Mutations
+3. Sync Steam Library
 
-Automation — ingestion and enrichment run continuously
+Requires a valid JWT in the HTTP headers.
 
-Security — administrative actions are protected
+Fetches the user's base games and playtime from the Steam API and updates their profile in the database.
+
+mutation SyncLibrary {
+  syncMyLibrary
+}
+Public Queries
+4. Get User Profile
+
+Fetches a user profile by their MongoDB ID, including their synced games and dynamically resolved game details.
+
+query GetFullProfile {
+  getUser(id: "USER_MONGODB_ID_HERE") {
+    name
+    ownedGames {
+      playtime_forever
+      gameDetails {
+        name
+        thumb
+      }
+    }
+  }
+}
+5. Get Global Games List (Paginated)
+
+Fetches a list of all games stored in the global database. Supports limit and offset for pagination.
+
+query GetAllGames {
+  getGames(limit: 20, offset: 0) {
+    appid
+    name
+    thumb
+  }
+}
+Protected User Queries
+6. Get Game Achievements
+
+Requires a valid JWT in the HTTP headers.
+
+Fetches the user's unlocked achievements for a single specific game directly from the Steam API.
+
+query GetAchievements {
+  getGameAchievements(appid: 730) {
+    name
+    description
+    completion_percentage
+  }
+}
