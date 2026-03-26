@@ -8,11 +8,28 @@ type Achievement {
   completion_percentage: Float
 }
 
+type RankingData {
+  positive_votes: Int
+  negative_votes: Int
+  score: Float
+}
+
 type Game {
-  appid: Int!
-  name: String!
-  thumb: String
+  appid: ID
+  name: String
+  description: String
+  genres: [String]
+  developer: String
+  release_date: String
   achievements: [Achievement]
+  current_players: Int
+  all_time_peak: Int
+  is_free: Boolean
+  price: String
+  status: String
+  thumb: String
+  ranking_data: RankingData
+  popularityScore: Float
 }
 
 type OwnedGame {
@@ -37,6 +54,9 @@ type Query {
   getUser(id: ID!): User  
   getGames(limit: Int, offset: Int): [Game]
   getGameAchievements(appid: Int!): [Achievement]
+  getGamesCount: Int!
+  getTotalActivePlayers: Int!
+  getMostPopularGames(limit: Int): [Game!]!
 }
 
 #Login Responses
