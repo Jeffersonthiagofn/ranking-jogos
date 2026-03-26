@@ -48,14 +48,6 @@ export default function Navbar() {
 
                     <button
                         type="button"
-                        className="grid h-10 w-10 place-items-center rounded-full bg-white/[0.03] ring-1 ring-white/10 hover:bg-white/[0.06]"
-                        aria-label="Favoritos"
-                    >
-                        <Heart className="h-4 w-4 text-white/70" />
-                    </button>
-
-                    <button
-                        type="button"
                         className="h-10 w-10 overflow-hidden rounded-full ring-1 ring-white/10 hover:ring-white/20"
                         aria-label="Perfil"
                     >
