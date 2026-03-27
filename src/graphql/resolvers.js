@@ -4,16 +4,14 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const resolvers = {
-    Query: {
-
-        Game: {
+    
+    Game: {
         thumb: (parent) => {
             return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/header.jpg`;
         },
         cover: (parent) => {
             return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/library_600x900.jpg`;
         },
-
         popularityScore: (parent) => {
             if (parent.popularityScore != null) {
                 return parent.popularityScore;
@@ -24,7 +22,15 @@ export const resolvers = {
 
             return score * Math.log10(votes + 1);
           },
+    },
+
+    OwnedGame: {
+        gameDetails: async (parent) => {
+            return await Game.findOne({ appid: parent.appid });
         },
+    },    
+
+    Query: {
 
         getUser: async (_, { id }) => {
             return await User.findById(id);
@@ -93,13 +99,6 @@ export const resolvers = {
             ]);
         },
     },
-
-    OwnedGame: {
-        gameDetails: async (parent) => {
-            return await Game.findOne({ appid: parent.appid });
-        },
-    },
-
 
     Mutation: {
         login: async (_, { email, password }) => {

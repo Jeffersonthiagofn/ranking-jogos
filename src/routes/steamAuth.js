@@ -6,8 +6,42 @@ import User from '../models/User.js';
 
 const router = express.Router();
 const port = process.env.PORT || 3000;
-
 const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+const handleDirectLogin = async (steamId, profile, avatarUrl) => {
+  let user = await User.findOne({ steamId: steamId });
+
+  if (!user) {
+    user = new User({
+      name: profile.displayName,
+      steamId: steamId,
+      avatar: avatarUrl
+    });
+  } else {
+    user.name = profile.displayName;
+    user.avatar = avatarUrl;
+  }
+  
+  await user.save();
+
+  return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+};
+
+
+const handleAccountLinking = async (linkToken, steamId, avatarUrl) => {
+  const decoded = jwt.verify(linkToken, process.env.JWT_SECRET);
+  const user = await User.findById(decoded.id);
+  
+  if (!user) throw new Error("User not found");
+
+  user.steamId = steamId;
+  if (!user.avatar) user.avatar = avatarUrl; 
+  
+  await user.save();
+  return user;
+};
+
 
 passport.use(new SteamStrategy({
     returnURL: `${baseUrl}/auth/steam/return`,
@@ -18,7 +52,6 @@ passport.use(new SteamStrategy({
   async (req, identifier, profile, done) => {
     try {
       const steamId = identifier.match(/\d+$/)[0];
-      
       return done(null, { steamId, profile });
     } catch (error) {
       return done(error, null);
@@ -26,48 +59,53 @@ passport.use(new SteamStrategy({
   }
 ));
 
+
 router.get('/steam', (req, res, next) => {
   const token = req.query.token;
-  if (!token) return res.status(401).send("No JWT provided");
-
-  res.cookie('jwt_temp', token, { maxAge: 1000 * 60 * 10, httpOnly: true });
   
+  if (token) {
+    res.cookie('jwt_link_temp', token, { 
+      maxAge: 1000 * 60 * 5, 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production' 
+    });
+  }
+
   passport.authenticate('steam', { session: false })(req, res, next);
 });
+
 
 router.get('/steam/return', 
   passport.authenticate('steam', { session: false, failureRedirect: '/' }), 
   async (req, res) => {
-    const token = req.cookies.jwt_temp;
-    if (!token) return res.status(401).send("Session expired during Steam login.");
-
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const steamId = req.user.steamId;
+      const profile = req.user.profile;
+      const avatarUrl = profile.photos && profile.photos.length > 0 ? profile.photos[2].value : '';
       
-      const user = await User.findById(decoded.id);
-      
-      user.steamId = req.user.steamId;
-      user.name = req.user.profile.displayName;
-      if (req.user.profile.photos && req.user.profile.photos.length > 0) {
-        user.avatar = req.user.profile.photos[2].value;
+      const linkToken = req.cookies.jwt_link_temp;
+
+      if (linkToken) {
+        await handleAccountLinking(linkToken, steamId, avatarUrl);
+        
+        res.clearCookie('jwt_link_temp');
+        return res.redirect(`${frontendUrl}/profile?linked=true`);
+      } else {
+        const authToken = await handleDirectLogin(steamId, profile, avatarUrl);
+
+        res.cookie('auth_token', authToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 3600000
+        });
+
+        return res.redirect(`${frontendUrl}/dashboard`);
       }
 
-      await user.save();
-
-      res.clearCookie('jwt_temp');
-      res.json({
-        success: true,
-        message: "Steam account linked successfully!",
-        updatedUser: {
-          name: user.name,
-          steamId: user.steamId,
-          avatar: user.avatar
-        }
-      });
-
     } catch (err) {
-      console.error(err);
-      res.status(500).send("Error linking Steam account");
+      console.error("Steam Auth Error:", err);
+      return res.redirect(`${frontendUrl}/login?error=steam_auth_failed`); 
     }
   }
 );

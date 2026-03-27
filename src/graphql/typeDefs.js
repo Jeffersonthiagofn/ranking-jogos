@@ -28,6 +28,7 @@ type Game {
   price: String
   status: String
   thumb: String
+  cover: String
   ranking_data: RankingData
   popularityScore: Float
 }
