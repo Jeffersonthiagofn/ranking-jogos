@@ -5,6 +5,27 @@ import jwt from "jsonwebtoken";
 
 export const resolvers = {
     Query: {
+
+        Game: {
+        thumb: (parent) => {
+            return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/header.jpg`;
+        },
+        cover: (parent) => {
+            return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/library_600x900.jpg`;
+        },
+
+        popularityScore: (parent) => {
+            if (parent.popularityScore != null) {
+                return parent.popularityScore;
+            }
+
+            const score = parent.ranking_data?.score || 0;
+            const votes = parent.ranking_data?.positive_votes || 0;
+
+            return score * Math.log10(votes + 1);
+          },
+        },
+
         getUser: async (_, { id }) => {
             return await User.findById(id);
         },
@@ -79,21 +100,6 @@ export const resolvers = {
         },
     },
 
-    Game: {
-        thumb: (parent) => {
-            return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/header.jpg`;
-        },
-        popularityScore: (parent) => {
-            if (parent.popularityScore != null) {
-                return parent.popularityScore;
-            }
-
-            const score = parent.ranking_data?.score || 0;
-            const votes = parent.ranking_data?.positive_votes || 0;
-
-            return score * Math.log10(votes + 1);
-        },
-    },
 
     Mutation: {
         login: async (_, { email, password }) => {
@@ -115,6 +121,25 @@ export const resolvers = {
                 msg: "Login successful!",
                 token: token,
             };
+        },
+
+        register: async (_, { name, email, password }) => {
+            const userExists = await User.findOne({ email });
+            if (userExists) {
+                throw new Error("Email already registered");
+            }
+
+            const salt = await bcrypt.genSalt(10);
+            const encryptedPassword = await bcrypt.hash(password, salt);
+
+            const newUser = new User({
+                name,
+                email,
+                password: encryptedPassword,
+            });
+
+            await newUser.save();
+            return "User registered successfully!";
         },
 
         syncMyLibrary: async (_, __, context) => {
@@ -181,25 +206,6 @@ export const resolvers = {
             await user.save();
 
             return "Library and achievement stats synced successfully!";
-        },
-
-        register: async (_, { name, email, password }) => {
-            const userExists = await User.findOne({ email });
-            if (userExists) {
-                throw new Error("Email already registered");
-            }
-
-            const salt = await bcrypt.genSalt(10);
-            const encryptedPassword = await bcrypt.hash(password, salt);
-
-            const newUser = new User({
-                name,
-                email,
-                password: encryptedPassword,
-            });
-
-            await newUser.save();
-            return "User registered successfully!";
-        },
+        }
     },
 };

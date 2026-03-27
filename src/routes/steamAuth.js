@@ -55,7 +55,6 @@ router.get('/steam/return',
       await user.save();
 
       res.clearCookie('jwt_temp');
-      //res.redirect('Front end Url that we still dont have ;-;');
       res.json({
         success: true,
         message: "Steam account linked successfully!",
