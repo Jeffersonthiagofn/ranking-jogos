@@ -54,6 +54,7 @@ type User {
 type Query {
   getUser(id: ID!): User  
   getGames(limit: Int, offset: Int): [Game]
+  getGameByAppId(appid: Int!): Game
   getGameAchievements(appid: Int!): [Achievement]
   getGamesCount: Int!
   getTotalActivePlayers: Int!

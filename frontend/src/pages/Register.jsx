@@ -2,12 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User } from "lucide-react";
 
-import AuthLayout from "../components/AuthLayout";
+import AuthLayout from "../layouts/AuthLayout";
 import TextField from "../components/TextField";
 import GradientButton from "../components/GradientButton";
 import { registerUser } from "../services/authService";
-
-import heroImg from "../assets/login-hero.png"; // mesma imagem do login
+import heroImg from "../assets/login-hero.png";
 
 export default function Register() {
     const navigate = useNavigate();

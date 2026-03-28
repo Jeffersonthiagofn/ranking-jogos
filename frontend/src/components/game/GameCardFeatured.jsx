@@ -1,7 +1,8 @@
 import { Star, Heart, Users } from "lucide-react";
-import { formatCompactNumber, formatNumber, scoreToStars } from "../utils/dataChanges";
+import { formatCompactNumber, scoreToStars } from "../../utils/dataChanges";
+import { useNavigate } from "react-router-dom";
 
-export default function GameCard({
+export default function GameCardFeatured({
     game,
     isFavorite = false,
     onToggleFavorite,
@@ -10,9 +11,18 @@ export default function GameCard({
 }) {
     if (!game) return null;
 
+    const navigate = useNavigate();
+
+    function handleNavigate() {
+        navigate(`/game/${game.appid}`, {
+            state: { game },
+        });
+    }
+
     return (
         <div
-            className={`group overflow-hidden rounded-3xl bg-white/[0.03] ring-1 ring-white/10 transition-all duration-300 hover:bg-white/[0.05] hover:ring-white/15 ${
+            onClick={handleNavigate}
+            className={`cursor-pointer group overflow-hidden rounded-3xl bg-white/[0.03] ring-1 ring-white/10 transition-all duration-300 hover:bg-white/[0.05] hover:ring-white/15 ${
                 featured ? "min-h-[430px]" : "min-h-[360px]"
             }`}
         >
@@ -20,7 +30,7 @@ export default function GameCard({
                 <img
                     src={game.image}
                     alt={game.name}
-                    className={`w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${
+                    className={`w-full object-fill transition-transform duration-500 group-hover:scale-[1.03] ${
                         featured ? "h-[430px]" : "h-[240px]"
                     }`}
                 />
@@ -30,7 +40,10 @@ export default function GameCard({
                 <div className="absolute right-4 top-4">
                     <button
                         type="button"
-                        onClick={() => onToggleFavorite?.(game.id)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleFavorite?.(game.id);
+                        }}
                         className="grid h-10 w-10 place-items-center rounded-full bg-black/30 backdrop-blur ring-1 ring-white/10 hover:bg-black/45"
                     >
                         <Heart
@@ -74,11 +87,13 @@ export default function GameCard({
                         </div>
                         {featured ? (
                             <div className="flex items-center justify-end gap-3">
-                                <button className="rounded-2xl bg-violet-500 px-5 py-3 text-sm font-medium text-white">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                    }}
+                                    className="rounded-2xl bg-violet-500 px-5 py-3 text-sm font-medium text-white"
+                                >
                                     Comparar
-                                </button>
-                                <button className="rounded-2xl bg-white/[0.04] px-5 py-3 text-sm font-medium text-white ring-1 ring-white/10">
-                                    Visão geral
                                 </button>
                             </div>
                         ) : null}

@@ -4,7 +4,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const resolvers = {
-    
     Game: {
         thumb: (parent) => {
             return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/header.jpg`;
@@ -21,23 +20,26 @@ export const resolvers = {
             const votes = parent.ranking_data?.positive_votes || 0;
 
             return score * Math.log10(votes + 1);
-          },
+        },
     },
 
     OwnedGame: {
         gameDetails: async (parent) => {
             return await Game.findOne({ appid: parent.appid });
         },
-    },    
+    },
 
     Query: {
-
         getUser: async (_, { id }) => {
             return await User.findById(id);
         },
 
         getGames: async (_, { limit = 20, offset = 0 }) => {
             return await Game.find().skip(offset).limit(limit);
+        },
+
+        getGameByAppId: async (_, { appid }) => {
+            return Game.findOne({ appid });
         },
 
         getGameAchievements: async (_, { appid }, context) => {
@@ -205,6 +207,6 @@ export const resolvers = {
             await user.save();
 
             return "Library and achievement stats synced successfully!";
-        }
+        },
     },
 };

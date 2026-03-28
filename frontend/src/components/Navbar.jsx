@@ -1,5 +1,5 @@
-import { NavLink } from "react-router-dom";
-import { Search, Heart, Gamepad2 } from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Search, Gamepad2 } from "lucide-react";
 
 function NavItem({ to, children }) {
     return (
@@ -22,15 +22,17 @@ export default function Navbar() {
         <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0B0B10]/70 backdrop-blur">
             <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-6">
                 {/* Brand */}
-                <div className="flex items-center gap-2">
-                    <div className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 ring-1 ring-white/10">
-                        <Gamepad2 className="h-5 w-5 text-violet-300" />
+                <NavItem to="/dashboard">
+                    <div className="cursor-pointer flex items-center gap-2">
+                        <div className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 ring-1 ring-white/10">
+                            <Gamepad2 className="h-5 w-5 text-violet-300" />
+                        </div>
+                        <span className="text-sm font-semibold text-white/90">GameRank</span>
                     </div>
-                    <span className="text-sm font-semibold text-white/90">GameRank</span>
-                </div>
+                </NavItem>
 
                 {/* Links */}
-                <nav className="hidden items-center gap-6 md:flex">
+                <nav className="pl-6 hidden items-center gap-6 md:flex">
                     <NavItem to="/dashboard">Painel</NavItem>
                     <NavItem to="/ranking">Ranking</NavItem>
                     <NavItem to="/comparacao">Comparação</NavItem>

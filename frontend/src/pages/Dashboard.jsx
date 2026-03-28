@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRight, Heart, Sparkles, Users, BarChart3 } from "lucide-react";
 import AppLayout from "../layouts/AppLayout";
-import GameCard from "../components/GameCard";
+import GameCardFeatured from "../components/game/GameCardFeatured";
+import GameCardsSecondary from "../components/game/GameCardsSecondary";
 import { getDashboardGames } from "../services/dashboardService";
 import { formatCompactNumber, formatNumber } from "../utils/dataChanges";
 
@@ -24,7 +25,6 @@ export default function Dashboard() {
                 setLoading(true);
                 setError("");
                 const result = await getDashboardGames(20, 0);
-                console.log(result);
                 if (mounted) {
                     setMostPopularGames(result.games);
                     setTotalGames(result.totalGames);
@@ -133,7 +133,7 @@ export default function Dashboard() {
                     </div>
                 ) : featuredGame ? (
                     <div className="grid gap-6 xl:grid-cols-[1.65fr_0.85fr]">
-                        <GameCard
+                        <GameCardFeatured
                             game={featuredGame}
                             featured
                             rank={1}
@@ -158,43 +158,12 @@ export default function Dashboard() {
                                     <p className="text-sm text-white/55">Nenhum jogo encontrado.</p>
                                 ) : (
                                     trendingGames.map((game, index) => (
-                                        <div
-                                            key={game.id}
-                                            className="flex items-center gap-4 rounded-2xl bg-black/20 px-4 py-3 ring-1 ring-white/5"
-                                        >
-                                            <span className="w-4 text-sm text-white/45">
-                                                {index + 2}
-                                            </span>
-
-                                            <img
-                                                src={game.image}
-                                                alt={game.name}
-                                                className="h-12 w-20 rounded-lg object-cover"
-                                            />
-
-                                            <div className="min-w-0 flex-1">
-                                                <p className="truncate text-sm font-medium text-white">
-                                                    {game.name}
-                                                </p>
-                                                <p className="mt-1 text-xs text-white/45">
-                                                    {game.genres?.[0] || "Sem gênero"}
-                                                </p>
-                                            </div>
-
-                                            <button
-                                                type="button"
-                                                onClick={() => toggleFavorite(game.id)}
-                                                className="grid h-9 w-9 place-items-center rounded-full bg-white/[0.03] ring-1 ring-white/10 hover:bg-white/[0.06]"
-                                            >
-                                                <Heart
-                                                    className={`h-4 w-4 ${
-                                                        favoriteIds.includes(game.id)
-                                                            ? "fill-violet-400 text-violet-300"
-                                                            : "text-white/60"
-                                                    }`}
-                                                />
-                                            </button>
-                                        </div>
+                                        <GameCardsSecondary
+                                            game={game}
+                                            index={index}
+                                            favoriteIds={favoriteIds}
+                                            toggleFavorite={toggleFavorite}
+                                        />
                                     ))
                                 )}
                             </div>
@@ -234,7 +203,7 @@ export default function Dashboard() {
                                     <img
                                         src={comparisonGames[0].image}
                                         alt={comparisonGames[0].name}
-                                        className="h-32 w-full rounded-xl object-cover"
+                                        className="h-32 w-full rounded-xl object-fill"
                                     />
                                     <p className="mt-4 text-lg font-medium text-white">
                                         {comparisonGames[0].name}
@@ -256,7 +225,7 @@ export default function Dashboard() {
                                     <img
                                         src={comparisonGames[1].image}
                                         alt={comparisonGames[1].name}
-                                        className="h-32 w-full rounded-xl object-cover"
+                                        className="h-32 w-full rounded-xl object-fill"
                                     />
                                     <p className="mt-4 text-lg font-medium text-white">
                                         {comparisonGames[1].name}

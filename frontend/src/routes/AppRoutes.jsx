@@ -5,6 +5,7 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Ranking from "../pages/Ranking";
 import Compare from "../pages/Compare";
+import GameDetails from "../pages/GameDetails";
 
 export function AppRoutes() {
     return (
@@ -33,6 +34,14 @@ export function AppRoutes() {
                     element={
                         <PrivateRoute>
                             <Compare />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/game/:appid"
+                    element={
+                        <PrivateRoute>
+                            <GameDetails />
                         </PrivateRoute>
                     }
                 />

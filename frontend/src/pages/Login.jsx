@@ -2,12 +2,12 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 
-import AuthLayout from "../components/AuthLayout";
+import AuthLayout from "../layouts/AuthLayout";
 import TextField from "../components/TextField";
 import GradientButton from "../components/GradientButton";
 import { AuthContext } from "../context/AuthContext";
 
-import heroImg from "../assets/login-hero.png"; // ajuste extensão
+import heroImg from "../assets/login-hero.png";
 
 export default function Login() {
     const { login } = useContext(AuthContext);
