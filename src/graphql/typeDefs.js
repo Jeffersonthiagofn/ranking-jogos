@@ -59,6 +59,7 @@ type Query {
   getGamesCount: Int!
   getTotalActivePlayers: Int!
   getMostPopularGames(limit: Int): [Game!]!
+  searchGames(query: String!): [Game!]!
 }
 
 #Login Responses

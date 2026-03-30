@@ -100,6 +100,11 @@ export const resolvers = {
                 { $limit: limit },
             ]);
         },
+        searchGames: async (_, { query }) => {
+            return Game.find({
+                name: { $regex: query, $options: "i" },
+            }).limit(4);
+        },
     },
 
     Mutation: {

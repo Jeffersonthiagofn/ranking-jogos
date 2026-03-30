@@ -18,8 +18,10 @@ export default function GameDetails() {
         async function loadGame() {
             try {
                 setLoading(true);
+                setGame(null);
 
                 const result = await getGameDetails(appid);
+                console.log(result);
                 if (mounted) {
                     setGame(result);
                 }
@@ -38,7 +40,7 @@ export default function GameDetails() {
         return () => {
             mounted = false;
         };
-    }, []);
+    }, [appid]);
 
     if (loading) return <AppLayout></AppLayout>;
     if (error)
