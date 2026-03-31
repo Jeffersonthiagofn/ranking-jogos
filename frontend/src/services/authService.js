@@ -24,3 +24,15 @@ export async function registerUser(name, email, password) {
     const data = await graphqlRequest(query, { name, email, password });
     return data.register;
 }
+
+export const loginWithSteam = () => {
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+    window.location.href = `${backendUrl}/auth/steam`;
+};
+
+export const linkSteamAccount = (token) => {
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+    window.location.href = `${backendUrl}/auth/steam?token=${token}`;
+};

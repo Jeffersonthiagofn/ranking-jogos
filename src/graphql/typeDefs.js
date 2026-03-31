@@ -53,6 +53,7 @@ type User {
 
 type Query {
   getUser(id: ID!): User  
+  getMe: User
   getGames(limit: Int, offset: Int): [Game]
   getGameByAppId(appid: Int!): Game
   getGameAchievements(appid: Int!): [Achievement]

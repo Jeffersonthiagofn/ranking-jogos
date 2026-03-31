@@ -34,6 +34,14 @@ export const resolvers = {
             return await User.findById(id);
         },
 
+        getMe: async (_, __, { user }) => {
+            if (!user) {
+                throw new Error("Não autenticado");
+            }
+
+            return user;
+        },
+
         getGames: async (_, { limit = 20, offset = 0 }) => {
             return await Game.find().skip(offset).limit(limit);
         },

@@ -6,6 +6,7 @@ import Dashboard from "../pages/Dashboard";
 import Ranking from "../pages/Ranking";
 import Compare from "../pages/Compare";
 import GameDetails from "../pages/GameDetails";
+import Profile from "../pages/Profile";
 
 export function AppRoutes() {
     return (
@@ -30,7 +31,7 @@ export function AppRoutes() {
                     }
                 />
                 <Route
-                    path="/comparacao"
+                    path="/compare"
                     element={
                         <PrivateRoute>
                             <Compare />
@@ -42,6 +43,14 @@ export function AppRoutes() {
                     element={
                         <PrivateRoute>
                             <GameDetails />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/profile"
+                    element={
+                        <PrivateRoute>
+                            <Profile />
                         </PrivateRoute>
                     }
                 />

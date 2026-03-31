@@ -100,7 +100,7 @@ export default function Navbar() {
                 <nav className="pl-6 hidden items-center gap-6 md:flex">
                     <NavItem to="/dashboard">Painel</NavItem>
                     <NavItem to="/ranking">Ranking</NavItem>
-                    <NavItem to="/comparacao">Comparação</NavItem>
+                    <NavItem to="/compare">Comparação</NavItem>
                 </nav>
 
                 {/* Right */}
@@ -135,13 +135,15 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    <button
-                        type="button"
-                        className="h-10 w-10 overflow-hidden rounded-full ring-1 ring-white/10 hover:ring-white/20"
-                        aria-label="Perfil"
-                    >
-                        <div className="h-full w-full bg-gradient-to-br from-violet-500/50 to-fuchsia-500/40" />
-                    </button>
+                    <NavItem to="/profile">
+                        <button
+                            type="button"
+                            className="h-10 w-10 overflow-hidden rounded-full ring-1 ring-white/10 hover:ring-white/20"
+                            aria-label="Perfil"
+                        >
+                            <div className="h-full w-full bg-gradient-to-br from-violet-500/50 to-fuchsia-500/40" />
+                        </button>
+                    </NavItem>
                 </div>
             </div>
         </header>

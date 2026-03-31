@@ -60,7 +60,7 @@ export default function GameDetails() {
 
     return (
         <AppLayout>
-            <div className="pt-8 pb-12 text-white">
+            <div className=" pb-12 text-white">
                 <div className="grid gap-10 lg:grid-cols-[240px_1fr] items-start">
                     <div>
                         <img
