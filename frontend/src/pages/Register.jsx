@@ -37,7 +37,7 @@ export default function Register() {
             setSuccessMessage(message || "Cadastro realizado com sucesso.");
 
             setTimeout(() => {
-                navigate("/");
+                navigate("/login");
             }, 1500);
         } catch (err) {
             setError(err.message || "Não foi possível realizar o cadastro.");
@@ -109,7 +109,7 @@ export default function Register() {
                     Já tem uma conta?{" "}
                     <button
                         type="button"
-                        onClick={() => navigate("/")}
+                        onClick={() => navigate("/login")}
                         className="font-medium text-violet-300 hover:text-violet-200"
                     >
                         Entrar

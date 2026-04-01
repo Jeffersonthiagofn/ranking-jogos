@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { graphqlRequest } from "../services/graphql";
+import { logoutUser } from "../services/authService";
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -11,7 +12,7 @@ export function AuthProvider({ children }) {
             const query = `
                 query {
                     getMe {
-                        _id
+                        id
                         name
                         avatar
                     }
@@ -43,8 +44,8 @@ export function AuthProvider({ children }) {
         await fetchMe();
     }
 
-    function logout() {
-        localStorage.removeItem("token");
+    async function logout() {
+        await logoutUser();
         setUser(null);
     }
 

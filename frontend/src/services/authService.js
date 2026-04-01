@@ -14,6 +14,17 @@ export async function loginUser(email, password) {
     return data.login;
 }
 
+export const logoutUser = async () => {
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+    await fetch(`${backendUrl}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+    });
+
+    localStorage.removeItem("token");
+};
+
 export async function registerUser(name, email, password) {
     const query = `
     mutation Register($name: String!, $email: String!, $password: String!) {

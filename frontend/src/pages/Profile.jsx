@@ -1,8 +1,11 @@
 import AppLayout from "../layouts/AppLayout";
 import profileImg from "../assets/image-profile.avif";
 import backgroundImg from "../assets/background-profile.png";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import { getMe } from "../services/userService";
+import { Settings } from "lucide-react";
 
 function Stat({ title, value, subtitle }) {
     return (
@@ -16,25 +19,13 @@ function Stat({ title, value, subtitle }) {
 }
 
 export default function Profile() {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { user, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        async function loadUser() {
-            try {
-                const data = await getMe();
-                setUser(data);
-            } catch (err) {
-                console.error("Erro ao carregar usuário:", err);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        loadUser();
-    }, []);
-
-    if (loading) return <AppLayout />;
+    async function handleLogout() {
+        await logout();
+        navigate("/login");
+    }
 
     if (!user) {
         return (
@@ -79,11 +70,17 @@ export default function Profile() {
                                 </button>
 
                                 <button className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
-                                    ⚙
+                                    <Settings />
                                 </button>
 
                                 <button className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
                                     ⋯
+                                </button>
+                                <button
+                                    onClick={handleLogout}
+                                    className="mt-4 rounded-xl bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                                >
+                                    Logout
                                 </button>
                             </div>
                         </div>

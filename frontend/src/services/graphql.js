@@ -20,6 +20,7 @@ export async function graphqlRequest(query, variables = {}, options = {}) {
     const result = await response.json();
 
     if (result.errors?.length) {
+        console.error("GraphQL ERROR:", result.errors);
         throw new Error(result.errors[0].message || "Erro na requisição GraphQL");
     }
 
