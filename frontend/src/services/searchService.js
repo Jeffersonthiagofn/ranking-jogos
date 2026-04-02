@@ -6,7 +6,7 @@ export async function searchGames(query) {
             searchGames(query: $query) {
                 appid
                 name
-                thumb
+                icon
                 price
                 is_free
             }

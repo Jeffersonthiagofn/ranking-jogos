@@ -22,7 +22,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (user) navigate("/dashboard");
+        if (user) navigate("/");
     }, [user]);
 
     async function handleSubmit(e) {
@@ -42,7 +42,7 @@ export default function Login() {
         try {
             setLoading(true);
             await login(email, password);
-            navigate("/dashboard");
+            navigate("/");
         } catch (err) {
             setError(err.message || "Não foi possível fazer login.");
         } finally {

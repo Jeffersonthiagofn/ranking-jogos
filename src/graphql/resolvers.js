@@ -6,10 +6,10 @@ import jwt from "jsonwebtoken";
 export const resolvers = {
     Game: {
         thumb: (parent) => {
-        return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/capsule_231x87.jpg`;
+            return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/header.jpg`;
         },
         icon: (parent) => {
-            return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/header.jpg`;
+            return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/capsule_231x87.jpg`;
         },
         cover: (parent) => {
             return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/library_600x900.jpg`;
@@ -33,9 +33,9 @@ export const resolvers = {
     },
 
     Favorite: {
-    gameDetails: async (parent) => {
-        return await Game.findOne({ appid: parent.appid });
-        }
+        gameDetails: async (parent) => {
+            return await Game.findOne({ appid: parent.appid });
+        },
     },
 
     Query: {
@@ -44,17 +44,17 @@ export const resolvers = {
         },
 
         getMe: async (_, __, context) => {
-        if (!context.user) {
-            throw new Error("Not verified");
-        }
+            if (!context.user) {
+                throw new Error("Not verified");
+            }
 
-        const currentUser = await User.findById(context.user.id); 
+            const currentUser = await User.findById(context.user.id);
 
-        if (!currentUser) {
-            throw new Error("User not found");
-        }
+            if (!currentUser) {
+                throw new Error("User not found");
+            }
 
-        return currentUser;
+            return currentUser;
         },
 
         getGames: async (_, { limit = 20, offset = 0 }) => {

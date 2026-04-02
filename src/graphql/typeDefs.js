@@ -29,6 +29,7 @@ type Game {
   status: String
   thumb: String
   cover: String
+  icon: String
   ranking_data: RankingData
   popularityScore: Float
 }
@@ -39,6 +40,11 @@ type OwnedGame {
   completed_achievements: Int
   total_achievements: Int
   unlocked_achievements: [String]
+  gameDetails: Game 
+}
+
+type Favorite {
+  appid: Int!
   gameDetails: Game 
 }
 

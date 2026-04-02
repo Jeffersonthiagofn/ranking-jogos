@@ -12,40 +12,12 @@ export function AppRoutes() {
     return (
         <BrowserRouter>
             <Routes>
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route
-                    path="/dashboard"
-                    element={
-                        <PrivateRoute>
-                            <Dashboard />
-                        </PrivateRoute>
-                    }
-                />
-                <Route
-                    path="/ranking"
-                    element={
-                        <PrivateRoute>
-                            <Ranking />
-                        </PrivateRoute>
-                    }
-                />
-                <Route
-                    path="/compare"
-                    element={
-                        <PrivateRoute>
-                            <Compare />
-                        </PrivateRoute>
-                    }
-                />
-                <Route
-                    path="/game/:appid"
-                    element={
-                        <PrivateRoute>
-                            <GameDetails />
-                        </PrivateRoute>
-                    }
-                />
+                <Route path="/ranking" element={<Ranking />} />
+                <Route path="/compare" element={<Compare />} />
+                <Route path="/game/:appid" element={<GameDetails />} />
                 <Route
                     path="/profile"
                     element={
