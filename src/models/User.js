@@ -8,13 +8,18 @@ const UserSchema = new mongoose.Schema({
   
   email: {
     type: String,
-    required: true,
-    unique: true
+    required: function() { 
+        return !this.steamId; 
+    },
+    unique: true,
+    sparse: true 
   },
   
   password: {
     type: String,
-    required: true,
+    required: function() { 
+        return !this.steamId; 
+    },
   },
   
   steamId: { 
@@ -34,7 +39,12 @@ const UserSchema = new mongoose.Schema({
     completed_achievements: { type: Number, default: 0 },
     total_achievements: { type: Number, default: 0 },
     unlocked_achievements: [{ type: String }]
+  }],
+
+  favorites: [{
+    appid: {type: Number, required:true}
   }]
+
 });
 
 export default mongoose.model("User", UserSchema);

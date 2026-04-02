@@ -9,21 +9,50 @@ const port = process.env.PORT || 3000;
 const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
+const fetchAndFormatSteamGames = async (steamId) => {
+    try {
+        const gamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&format=json`;
+        const gamesRes = await fetch(gamesUrl);
+        const gamesData = await gamesRes.json();
+
+        if (gamesData.response && gamesData.response.games) {
+            return gamesData.response.games.map((game) => ({
+                appid: game.appid,
+                playtime_forever: game.playtime_forever,
+                completed_achievements: 0,
+                total_achievements: 0,
+                unlocked_achievements: [],
+            }));
+        }
+        return [];
+    } catch (error) {
+        console.error(`Failed to fetch games for SteamID ${steamId}:`, error);
+        return [];
+    }
+};
+
 const handleDirectLogin = async (steamId, profile, avatarUrl) => {
     let user = await User.findOne({ steamId: steamId });
+    const safeName = profile.displayName || "Steam User";
 
     if (!user) {
         user = new User({
-            name: profile.displayName,
+            name: safeName,
             steamId: steamId,
             avatar: avatarUrl,
         });
     } else {
-        user.name = profile.displayName;
+        user.name = safeName;
         user.avatar = avatarUrl;
     }
 
+    const fetchedGames = await fetchAndFormatSteamGames(steamId);
+    if (fetchedGames.length > 0) {
+        user.ownedGames = fetchedGames; 
+    }
+
     await user.save();
+    console.log("STEAM USER SAVED TO DB:", user.name);
 
     return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
@@ -37,7 +66,14 @@ const handleAccountLinking = async (linkToken, steamId, avatarUrl) => {
     user.steamId = steamId;
     if (!user.avatar) user.avatar = avatarUrl;
 
+    const fetchedGames = await fetchAndFormatSteamGames(steamId);
+    if (fetchedGames.length > 0) {
+        user.ownedGames = fetchedGames; 
+    }
+
     await user.save();
+    console.log("ACCOUNT LINKED AND GAMES SYNCED FOR:", user.name);
+    
     return user;
 };
 
