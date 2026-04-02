@@ -1,10 +1,9 @@
 import AppLayout from "../layouts/AppLayout";
 import profileImg from "../assets/image-profile.avif";
 import backgroundImg from "../assets/background-profile.png";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { getMe } from "../services/userService";
 import { Settings } from "lucide-react";
 
 function Stat({ title, value, subtitle }) {
@@ -19,8 +18,13 @@ function Stat({ title, value, subtitle }) {
 }
 
 export default function Profile() {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
+
+    function toggleMenu() {
+        setIsMenuOpen((prev) => !prev);
+    }
 
     async function handleLogout() {
         await logout();
@@ -69,19 +73,24 @@ export default function Profile() {
                                     Editar perfil
                                 </button>
 
-                                <button className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
-                                    <Settings />
-                                </button>
-
-                                <button className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
-                                    ⋯
-                                </button>
-                                <button
-                                    onClick={handleLogout}
-                                    className="mt-4 rounded-xl bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                                >
-                                    Logout
-                                </button>
+                                <div className="relative flex items-center gap-2">
+                                    <button
+                                        onClick={toggleMenu}
+                                        className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center"
+                                    >
+                                        <Settings className="h-5" />
+                                    </button>
+                                    {isMenuOpen && (
+                                        <div className="  rounded-xl bg-[#1b2838] shadow-lg ring-1 ring-white/10 z-50 hover:bg-red-900">
+                                            <button
+                                                onClick={handleLogout}
+                                                className="w-full rounded-xl px-5 py-1 text-xs text-white"
+                                            >
+                                                Sair
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -90,7 +90,8 @@ export default function Navbar() {
                 <NavItem to="/dashboard">
                     <div className="cursor-pointer flex items-center gap-2">
                         <div className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 ring-1 ring-white/10">
-                            <Gamepad2 className="h-5 w-5 text-violet-300" />
+                            {/* <Gamepad2 className="h-5 w-5 text-violet-300" /> */}
+                            <img className="h-6" src="/icon-gamerank.svg" alt="" />
                         </div>
                         <span className="text-sm font-semibold text-white/90">GameRank</span>
                     </div>

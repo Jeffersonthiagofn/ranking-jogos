@@ -21,7 +21,6 @@ export default function GameDetails() {
                 setGame(null);
 
                 const result = await getGameDetails(appid);
-                console.log(result);
                 if (mounted) {
                     setGame(result);
                 }
