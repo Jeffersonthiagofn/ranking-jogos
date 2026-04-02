@@ -6,6 +6,9 @@ import jwt from "jsonwebtoken";
 export const resolvers = {
     Game: {
         thumb: (parent) => {
+        return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/capsule_231x87.jpg`;
+        },
+        icon: (parent) => {
             return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${parent.appid}/header.jpg`;
         },
         cover: (parent) => {
@@ -29,17 +32,29 @@ export const resolvers = {
         },
     },
 
+    Favorite: {
+    gameDetails: async (parent) => {
+        return await Game.findOne({ appid: parent.appid });
+        }
+    },
+
     Query: {
         getUser: async (_, { id }) => {
             return await User.findById(id);
         },
 
-        getMe: async (_, __, { user }) => {
-            if (!user) {
-                throw new Error("Não autenticado");
-            }
+        getMe: async (_, __, context) => {
+        if (!context.user) {
+            throw new Error("Not verified");
+        }
 
-            return user;
+        const currentUser = await User.findById(context.user.id); 
+
+        if (!currentUser) {
+            throw new Error("User not found");
+        }
+
+        return currentUser;
         },
 
         getGames: async (_, { limit = 20, offset = 0 }) => {
@@ -76,6 +91,7 @@ export const resolvers = {
         getGamesCount: async () => {
             return Game.countDocuments();
         },
+
         getTotalActivePlayers: async () => {
             const result = await Game.aggregate([
                 {
@@ -88,6 +104,7 @@ export const resolvers = {
 
             return result[0]?.total || 0;
         },
+
         getMostPopularGames: async (_, { limit = 5 }) => {
             return await Game.aggregate([
                 {
@@ -108,6 +125,7 @@ export const resolvers = {
                 { $limit: limit },
             ]);
         },
+
         searchGames: async (_, { query }) => {
             return Game.find({
                 name: { $regex: query, $options: "i" },

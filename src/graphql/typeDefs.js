@@ -45,10 +45,11 @@ type OwnedGame {
 type User {
   id: ID!
   name: String!
-  email: String!
+  email: String
   steamId: String
   avatar: String
   ownedGames: [OwnedGame]
+  favorites: [Favorite]
 }
 
 type Query {

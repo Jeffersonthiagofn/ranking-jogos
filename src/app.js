@@ -50,19 +50,21 @@ mongoose
         app.use(
             "/graphql",
             expressMiddleware(server, {
-                context: async ({ req }) => {
-                    const authHeader = req.headers.authorization || "";
-                    if (!authHeader.startsWith("Bearer ")) return { user: null };
+                context: ({ req, res }) => {
+                    let token = req.headers.authorization?.split(" ")[1];
+                    
+                    if (!token && req.cookies && req.cookies.auth_token) {
+                        token = req.cookies.auth_token;
+                    }
 
-                    const token = authHeader.split(" ")[1];
+                    if (!token) {
+                        return { user: null }; 
+                    }
+
                     try {
                         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                        // return { user: decoded };
-                        const user = await User.findById(decoded.id);
-
-                        return { user };
+                        return { user: decoded };
                     } catch (err) {
-                        console.warn("Invalid JWT provided to GraphQL");
                         return { user: null };
                     }
                 },
