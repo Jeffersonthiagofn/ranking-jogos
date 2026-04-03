@@ -5,10 +5,11 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { Settings } from "lucide-react";
+import { formatCompactNumber } from "../utils/dataChanges";
 
 function Stat({ title, value, subtitle }) {
     return (
-        <div>
+        <div className="flex flex-col items-center justify-center">
             <p className="text-[11px] uppercase tracking-wide text-white/40">{title}</p>
             <p className="mt-1 text-lg font-semibold text-white">
                 {value} {subtitle && <span className="text-sm text-white/50">{subtitle}</span>}
@@ -22,13 +23,124 @@ export default function Profile() {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
+    const userMOCKED = {
+        ownedGames: [
+            {
+                appid: 1,
+                playtime_forever: 324,
+                completed_achievements: 10,
+                total_achievements: 73,
+                unlocked_achievements: [
+                    {
+                        id_achievements: 1,
+                    },
+                    {
+                        id_achievements: 2,
+                    },
+                    {
+                        id_achievements: 3,
+                    },
+                ],
+            },
+            {
+                appid: 2,
+                playtime_forever: 324,
+                completed_achievements: 10,
+                total_achievements: 73,
+                unlocked_achievements: [
+                    {
+                        id_achievements: 1,
+                    },
+                    {
+                        id_achievements: 2,
+                    },
+                    {
+                        id_achievements: 3,
+                    },
+                ],
+            },
+            {
+                appid: 3,
+                playtime_forever: 324,
+                completed_achievements: 10,
+                total_achievements: 73,
+                unlocked_achievements: [
+                    {
+                        id_achievements: 1,
+                    },
+                    {
+                        id_achievements: 2,
+                    },
+                    {
+                        id_achievements: 3,
+                    },
+                ],
+            },
+            {
+                appid: 4,
+                playtime_forever: 324,
+                completed_achievements: 10,
+                total_achievements: 73,
+                unlocked_achievements: [
+                    {
+                        id_achievements: 1,
+                    },
+                    {
+                        id_achievements: 2,
+                    },
+                    {
+                        id_achievements: 3,
+                    },
+                ],
+            },
+            {
+                appid: 5,
+                playtime_forever: 324,
+                completed_achievements: 10,
+                total_achievements: 73,
+                unlocked_achievements: [
+                    {
+                        id_achievements: 1,
+                    },
+                    {
+                        id_achievements: 2,
+                    },
+                    {
+                        id_achievements: 3,
+                    },
+                ],
+            },
+        ],
+    };
+
+    const playedGamesCount = userMOCKED.ownedGames.reduce(
+        (acc, game) => (game.playtime_forever > 0 ? acc + 1 : acc),
+        0,
+    );
+
+    const playtimeForeverSum = userMOCKED.ownedGames.reduce(
+        (acc, game) => acc + game.playtime_forever,
+        0,
+    );
+
+    const totalAchievementsSum = userMOCKED.ownedGames.reduce(
+        (acc, game) => acc + game.total_achievements,
+        0,
+    );
+    const totalAchievementsSumFormated = `/${formatCompactNumber(totalAchievementsSum)}`;
+
+    const completed_achievementsSum = userMOCKED.ownedGames.reduce(
+        (acc, game) => acc + game.completed_achievements,
+        0,
+    );
+
     function toggleMenu() {
         setIsMenuOpen((prev) => !prev);
     }
 
     async function handleLogout() {
         await logout();
-        navigate("/login");
+        navigate("/");
     }
 
     if (!user) {
@@ -54,7 +166,7 @@ export default function Profile() {
                     <div className="relative z-10 flex items-center gap-6 px-6 py-6">
                         <div className="relative">
                             <img
-                                src={profileImg}
+                                src={user.avatar}
                                 alt="profile"
                                 className="h-20 w-20 rounded-full ring-4 ring-violet-500/40"
                             />
@@ -66,7 +178,7 @@ export default function Profile() {
 
                             <h1 className="text-2xl font-semibold">{user.name}</h1>
 
-                            <p className="text-sm text-white/60">Legendary Player • Nível 87</p>
+                            <p className="text-sm text-white/60">Iniciante • Nível 1</p>
 
                             <div className="mt-2 flex items-center gap-2">
                                 <button className="rounded-full bg-violet-500 px-4 py-1.5 text-xs font-medium text-white hover:opacity-90">
@@ -97,22 +209,31 @@ export default function Profile() {
                 </div>
 
                 <div className="mt-6 px-6 grid gap-4 md:grid-cols-[1.5fr_0.8fr]">
-                    <div className="grid grid-cols-5 gap-4 rounded-2xl bg-white/[0.03] p-4 ring-1 ring-white/10">
-                        <Stat title="Ranking Global" value="#128" subtitle="Top 0.3%" />
-                        <Stat title="Jogos Jogados" value="1,284" />
-                        <Stat title="Horas Jogadas" value="3,742h" />
-                        <Stat title="Vitórias" value="67%" />
-                        <Stat title="Conquistas" value="245" subtitle="/312" />
+                    <div className="grid grid-cols-4 gap-4 rounded-2xl bg-white/[0.03] p-4 ring-1 ring-white/10">
+                        <Stat
+                            title="Total de Jogos"
+                            value={formatCompactNumber(userMOCKED.ownedGames.length)}
+                        />
+                        <Stat title="Jogos Jogados" value={formatCompactNumber(playedGamesCount)} />
+                        <Stat
+                            title="Horas Jogadas"
+                            value={formatCompactNumber(playtimeForeverSum)}
+                        />
+                        <Stat
+                            title="Conquistas"
+                            value={formatCompactNumber(completed_achievementsSum)}
+                            subtitle={totalAchievementsSumFormated}
+                        />
                     </div>
 
                     <div className="rounded-2xl bg-gradient-to-r from-violet-500/20 to-indigo-500/20 p-4 ring-1 ring-violet-400/20">
-                        <p className="text-sm text-white/70">Nível 87</p>
+                        <p className="text-sm text-white/70">Nível 1</p>
 
                         <div className="mt-3 h-2 w-full rounded-full bg-white/10">
-                            <div className="h-2 w-[70%] rounded-full bg-violet-400" />
+                            <div className="h-2 w-[10%] rounded-full bg-violet-400" />
                         </div>
 
-                        <p className="mt-2 text-xs text-white/50">12,450 / 15,000 XP</p>
+                        <p className="mt-2 text-xs text-white/50">100 / 1,000 XP</p>
                     </div>
                 </div>
             </div>

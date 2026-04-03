@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronRight, Heart, Sparkles, Users, BarChart3 } from "lucide-react";
+import { ChevronRight, Sparkles, Users, BarChart3 } from "lucide-react";
 import AppLayout from "../layouts/AppLayout";
 import GameCardFeatured from "../components/game/GameCardFeatured";
 import GameCardsSecondary from "../components/game/GameCardsSecondary";
 import { getDashboardGames } from "../services/dashboardService";
-import { formatCompactNumber, formatNumber } from "../utils/dataChanges";
+import { formatCompactNumber } from "../utils/dataChanges";
 
 export default function Dashboard() {
     const [mostPopularGames, setMostPopularGames] = useState([]);

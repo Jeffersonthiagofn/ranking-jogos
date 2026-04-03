@@ -8,7 +8,7 @@ export function PrivateRoute({ children }) {
 
     if (loading) return <AppLayout></AppLayout>;
 
-    if (!user) return <Navigate to="/login" />;
+    if (!user) return <Navigate to="/" />;
 
     return children;
 }
