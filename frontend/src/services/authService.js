@@ -47,3 +47,16 @@ export const linkSteamAccount = (token) => {
 
     window.location.href = `${backendUrl}/auth/steam?token=${token}`;
 };
+
+export async function toggleFavoriteRequest(appid) {
+    const mutation = `
+        mutation($appid: Int!) {
+            toggleFavorite(appid: $appid) {
+                appid
+            }
+        }
+    `;
+
+    const data = await graphqlRequest(mutation, { appid });
+    return data.toggleFavorite;
+}

@@ -1,11 +1,12 @@
 import AppLayout from "../layouts/AppLayout";
-import profileImg from "../assets/image-profile.avif";
 import backgroundImg from "../assets/background-profile.png";
-import { useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { Settings } from "lucide-react";
 import { formatCompactNumber } from "../utils/dataChanges";
+import { getMyFavorites } from "../services/profileService";
+import FavoriteCard from "../components/game/FavoriteCard";
 
 function Stat({ title, value, subtitle }) {
     return (
@@ -20,6 +21,9 @@ function Stat({ title, value, subtitle }) {
 
 export default function Profile() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [showAllFavorites, setShowAllFavorites] = useState(false);
+    const [favorites, setFavorites] = useState([]);
+    const [loadingFavorites, setLoadingFavorites] = useState(true);
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -151,6 +155,44 @@ export default function Profile() {
         );
     }
 
+    async function fetchFavorites() {
+        try {
+            const data = await getMyFavorites();
+            setFavorites(data);
+        } catch (err) {
+            console.error("Erro ao buscar favoritos:", err);
+        } finally {
+            setLoadingFavorites(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchFavorites();
+    }, [favorites]);
+
+    const cardsPerRow =
+        window.innerWidth < 640
+            ? 2
+            : window.innerWidth < 1024
+              ? 4
+              : window.innerWidth < 1280
+                ? 5
+                : 6;
+
+    // const visibleFavorites = showAllFavorites ? favorites : favorites.slice(0, cardsPerRow);
+
+    // const remainingCount = favorites.length - cardsPerRow;
+
+    const hasRemaining = favorites.length > cardsPerRow;
+
+    const visibleFavorites = showAllFavorites
+        ? favorites
+        : hasRemaining
+          ? favorites.slice(0, cardsPerRow - 1) // 👈 aqui está o segredo
+          : favorites;
+
+    const remainingCount = favorites.length - (cardsPerRow - 1);
+
     return (
         <AppLayout>
             <div className="text-white">
@@ -235,6 +277,35 @@ export default function Profile() {
 
                         <p className="mt-2 text-xs text-white/50">100 / 1,000 XP</p>
                     </div>
+                </div>
+            </div>
+            <div className="mt-10">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-white">Lista de favoritos</h2>
+
+                    {favorites.length > cardsPerRow && (
+                        <button
+                            onClick={() => setShowAllFavorites((prev) => !prev)}
+                            className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
+                        >
+                            {showAllFavorites ? "Mostrar menos" : "Ver todos"}
+                        </button>
+                    )}
+                </div>
+
+                {/* Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    {visibleFavorites.map((fav) => (
+                        <FavoriteCard key={fav.appid} game={fav.gameDetails} />
+                    ))}
+
+                    {!showAllFavorites && hasRemaining && (
+                        <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600/40 to-violet-900/40 text-white font-semibold">
+                            +{remainingCount}
+                            <span className="block text-xs text-white/60 ml-1">outros jogos</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </AppLayout>

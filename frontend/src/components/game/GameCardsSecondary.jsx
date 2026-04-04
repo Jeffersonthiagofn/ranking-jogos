@@ -13,7 +13,7 @@ export default function GameCardsSecondary({ game, index, favoriteIds, toggleFav
     return (
         <div
             onClick={handleNavigate}
-            key={game.id}
+            key={game.appid}
             className="cursor-pointer flex items-center gap-4 rounded-2xl bg-black/20 px-4 py-3 ring-1 ring-white/5"
         >
             <span className="w-4 text-sm text-white/45">{index + 2}</span>
@@ -29,13 +29,13 @@ export default function GameCardsSecondary({ game, index, favoriteIds, toggleFav
                 type="button"
                 onClick={(e) => {
                     e.stopPropagation();
-                    toggleFavorite?.(game.id);
+                    toggleFavorite?.(game.appid);
                 }}
                 className="grid h-9 w-9 place-items-center rounded-full bg-white/[0.03] ring-1 ring-white/10 hover:bg-white/[0.06]"
             >
                 <Heart
                     className={`h-4 w-4 ${
-                        favoriteIds.includes(game.id)
+                        favoriteIds.includes(Number(game.appid))
                             ? "fill-violet-400 text-violet-300"
                             : "text-white/60"
                     }`}

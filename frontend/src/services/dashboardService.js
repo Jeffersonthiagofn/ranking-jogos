@@ -48,3 +48,25 @@ export async function getDashboardGames(limit = 5) {
         totalActivePlayers: response.getTotalActivePlayers || 0,
     };
 }
+
+export async function fetchFavorites(setFavoriteIds) {
+    try {
+        const query = `
+            query {
+                getMe {
+                    favorites {
+                        appid
+                    }
+                }
+            }
+        `;
+
+        const data = await graphqlRequest(query);
+
+        const ids = data.getMe.favorites.map((f) => Number(f.appid));
+
+        setFavoriteIds(ids);
+    } catch (err) {
+        console.error("Erro ao carregar favoritos:", err);
+    }
+}

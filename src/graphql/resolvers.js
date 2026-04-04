@@ -239,5 +239,22 @@ export const resolvers = {
 
             return "Library and achievement stats synced successfully!";
         },
+        toggleFavorite: async (_, { appid }, context) => {
+            if (!context.user) throw new Error("Unauthorized");
+
+            const user = await User.findById(context.user.id);
+
+            const exists = user.favorites.find((fav) => fav.appid === appid);
+
+            if (exists) {
+                user.favorites = user.favorites.filter((fav) => fav.appid !== appid);
+            } else {
+                user.favorites.push({ appid });
+            }
+
+            await user.save();
+
+            return user.favorites;
+        },
     },
 };

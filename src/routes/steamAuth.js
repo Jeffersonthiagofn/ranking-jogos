@@ -48,7 +48,7 @@ const handleDirectLogin = async (steamId, profile, avatarUrl) => {
 
     const fetchedGames = await fetchAndFormatSteamGames(steamId);
     if (fetchedGames.length > 0) {
-        user.ownedGames = fetchedGames; 
+        user.ownedGames = fetchedGames;
     }
 
     await user.save();
@@ -68,12 +68,12 @@ const handleAccountLinking = async (linkToken, steamId, avatarUrl) => {
 
     const fetchedGames = await fetchAndFormatSteamGames(steamId);
     if (fetchedGames.length > 0) {
-        user.ownedGames = fetchedGames; 
+        user.ownedGames = fetchedGames;
     }
 
     await user.save();
     console.log("ACCOUNT LINKED AND GAMES SYNCED FOR:", user.name);
-    
+
     return user;
 };
 
@@ -137,7 +137,7 @@ router.get(
                     maxAge: 3600000,
                 });
 
-                return res.redirect(`${frontendUrl}/dashboard`);
+                return res.redirect(`${frontendUrl}/`);
             }
         } catch (err) {
             console.error("Steam Auth Error:", err);

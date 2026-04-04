@@ -3,7 +3,8 @@ import { ChevronRight, Sparkles, Users, BarChart3 } from "lucide-react";
 import AppLayout from "../layouts/AppLayout";
 import GameCardFeatured from "../components/game/GameCardFeatured";
 import GameCardsSecondary from "../components/game/GameCardsSecondary";
-import { getDashboardGames } from "../services/dashboardService";
+import { fetchFavorites, getDashboardGames } from "../services/dashboardService";
+import { toggleFavoriteRequest } from "../services/authService";
 import { formatCompactNumber } from "../utils/dataChanges";
 
 export default function Dashboard() {
@@ -12,10 +13,7 @@ export default function Dashboard() {
     const [totalActivePlayers, setTotalActivePlayers] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [favoriteIds, setFavoriteIds] = useState(() => {
-        const saved = localStorage.getItem("dashboard-favorites");
-        return saved ? JSON.parse(saved) : [];
-    });
+    const [favoriteIds, setFavoriteIds] = useState([]);
 
     useEffect(() => {
         let mounted = true;
@@ -48,18 +46,29 @@ export default function Dashboard() {
         };
     }, []);
 
+    useEffect(() => {
+        fetchFavorites(setFavoriteIds);
+    }, []);
+
     const featuredGame = mostPopularGames[0] || null;
     const trendingGames = mostPopularGames.slice(1, 5);
 
-    function toggleFavorite(gameId) {
+    async function toggleFavorite(gameId) {
+        const intGameId = parseInt(gameId);
         setFavoriteIds((prev) => {
-            const next = prev.includes(gameId)
-                ? prev.filter((id) => id !== gameId)
-                : [...prev, gameId];
-
-            localStorage.setItem("dashboard-favorites", JSON.stringify(next));
-            return next;
+            return prev.includes(intGameId)
+                ? prev.filter((id) => id !== intGameId)
+                : [...prev, intGameId];
         });
+        try {
+            const updatedFavorites = await toggleFavoriteRequest(intGameId);
+
+            const ids = updatedFavorites.map((f) => Number(f.appid));
+
+            setFavoriteIds(ids);
+        } catch (err) {
+            console.error("Erro ao favoritar:", err);
+        }
     }
 
     const sortedByScore = useMemo(() => {
@@ -137,7 +146,7 @@ export default function Dashboard() {
                             game={featuredGame}
                             featured
                             rank={1}
-                            isFavorite={favoriteIds.includes(featuredGame.id)}
+                            favoriteIds={favoriteIds}
                             onToggleFavorite={toggleFavorite}
                         />
 

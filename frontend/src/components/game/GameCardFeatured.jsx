@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function GameCardFeatured({
     game,
-    isFavorite = false,
+    favoriteIds,
     onToggleFavorite,
     featured = false,
     rank = 1,
@@ -42,13 +42,15 @@ export default function GameCardFeatured({
                         type="button"
                         onClick={(e) => {
                             e.stopPropagation();
-                            onToggleFavorite?.(game.id);
+                            onToggleFavorite?.(game.appid);
                         }}
                         className="grid h-10 w-10 place-items-center rounded-full bg-black/30 backdrop-blur ring-1 ring-white/10 hover:bg-black/45"
                     >
                         <Heart
-                            className={`h-4 w-4 transition-colors ${
-                                isFavorite ? "fill-violet-400 text-violet-300" : "text-white/75"
+                            className={`h-4 w-4 ${
+                                favoriteIds.includes(Number(game.appid))
+                                    ? "fill-violet-400 text-violet-300"
+                                    : "text-white/60"
                             }`}
                         />
                     </button>
