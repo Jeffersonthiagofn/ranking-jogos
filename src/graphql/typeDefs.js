@@ -24,6 +24,7 @@ type Game {
   achievements: [Achievement]
   current_players: Int
   all_time_peak: Int
+  playtime_forever: Int
   is_free: Boolean
   price: String
   status: String
@@ -58,6 +59,11 @@ type User {
   favorites: [Favorite]
 }
 
+type GamesResponse {
+  games: [Game]
+  total: Int
+}
+
 type Query {
   getUser(id: ID!): User  
   getMe: User
@@ -66,8 +72,11 @@ type Query {
   getGameAchievements(appid: Int!): [Achievement]
   getGamesCount: Int!
   getTotalActivePlayers: Int!
+  getGenres: [String]
   getMostPopularGames(limit: Int): [Game!]!
+  getMyTopGames: [Game]
   searchGames(query: String!): [Game!]!
+  getGamesFiltered(genre: String, sort: String, limit: Int, offset: Int): GamesResponse
 }
 
 #Login Responses

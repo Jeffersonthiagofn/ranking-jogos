@@ -5,8 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { Settings } from "lucide-react";
 import { formatCompactNumber } from "../utils/dataChanges";
-import { getMyFavorites } from "../services/profileService";
+import { getMyTopGames, getMyFavorites } from "../services/profileService";
 import FavoriteCard from "../components/game/FavoriteCard";
+import TopGamesCard from "../components/TopGamesCard";
 
 function Stat({ title, value, subtitle }) {
     return (
@@ -21,119 +22,30 @@ function Stat({ title, value, subtitle }) {
 
 export default function Profile() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [showAllFavorites, setShowAllFavorites] = useState(false);
+    const [showAllGames, setShowAllGames] = useState(false);
     const [favorites, setFavorites] = useState([]);
+    const [topGames, setTopGames] = useState([]);
     const [loadingFavorites, setLoadingFavorites] = useState(true);
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    const userMOCKED = {
-        ownedGames: [
-            {
-                appid: 1,
-                playtime_forever: 324,
-                completed_achievements: 10,
-                total_achievements: 73,
-                unlocked_achievements: [
-                    {
-                        id_achievements: 1,
-                    },
-                    {
-                        id_achievements: 2,
-                    },
-                    {
-                        id_achievements: 3,
-                    },
-                ],
-            },
-            {
-                appid: 2,
-                playtime_forever: 324,
-                completed_achievements: 10,
-                total_achievements: 73,
-                unlocked_achievements: [
-                    {
-                        id_achievements: 1,
-                    },
-                    {
-                        id_achievements: 2,
-                    },
-                    {
-                        id_achievements: 3,
-                    },
-                ],
-            },
-            {
-                appid: 3,
-                playtime_forever: 324,
-                completed_achievements: 10,
-                total_achievements: 73,
-                unlocked_achievements: [
-                    {
-                        id_achievements: 1,
-                    },
-                    {
-                        id_achievements: 2,
-                    },
-                    {
-                        id_achievements: 3,
-                    },
-                ],
-            },
-            {
-                appid: 4,
-                playtime_forever: 324,
-                completed_achievements: 10,
-                total_achievements: 73,
-                unlocked_achievements: [
-                    {
-                        id_achievements: 1,
-                    },
-                    {
-                        id_achievements: 2,
-                    },
-                    {
-                        id_achievements: 3,
-                    },
-                ],
-            },
-            {
-                appid: 5,
-                playtime_forever: 324,
-                completed_achievements: 10,
-                total_achievements: 73,
-                unlocked_achievements: [
-                    {
-                        id_achievements: 1,
-                    },
-                    {
-                        id_achievements: 2,
-                    },
-                    {
-                        id_achievements: 3,
-                    },
-                ],
-            },
-        ],
-    };
-
-    const playedGamesCount = userMOCKED.ownedGames.reduce(
+    const playedGamesCount = user.ownedGames.reduce(
         (acc, game) => (game.playtime_forever > 0 ? acc + 1 : acc),
         0,
     );
 
-    const playtimeForeverSum = userMOCKED.ownedGames.reduce(
+    const playtimeForeverSum = user.ownedGames.reduce(
         (acc, game) => acc + game.playtime_forever,
         0,
     );
 
-    const totalAchievementsSum = userMOCKED.ownedGames.reduce(
+    const totalAchievementsSum = user.ownedGames.reduce(
         (acc, game) => acc + game.total_achievements,
         0,
     );
     const totalAchievementsSumFormated = `/${formatCompactNumber(totalAchievementsSum)}`;
 
-    const completed_achievementsSum = userMOCKED.ownedGames.reduce(
+    const completed_achievementsSum = user.ownedGames.reduce(
         (acc, game) => acc + game.completed_achievements,
         0,
     );
@@ -155,20 +67,22 @@ export default function Profile() {
         );
     }
 
-    async function fetchFavorites() {
+    async function fetchGamesProfile() {
         try {
-            const data = await getMyFavorites();
-            setFavorites(data);
+            const dataFavorites = await getMyFavorites();
+            const dataTopGames = await getMyTopGames();
+            setFavorites(dataFavorites);
+            setTopGames(dataTopGames);
         } catch (err) {
-            console.error("Erro ao buscar favoritos:", err);
+            console.error("Erro ao buscar os jogos da tela Profile", err);
         } finally {
             setLoadingFavorites(false);
         }
     }
 
     useEffect(() => {
-        fetchFavorites();
-    }, [favorites]);
+        fetchGamesProfile();
+    }, [favorites, topGames]);
 
     const cardsPerRow =
         window.innerWidth < 640
@@ -179,19 +93,25 @@ export default function Profile() {
                 ? 5
                 : 6;
 
-    // const visibleFavorites = showAllFavorites ? favorites : favorites.slice(0, cardsPerRow);
-
-    // const remainingCount = favorites.length - cardsPerRow;
-
     const hasRemaining = favorites.length > cardsPerRow;
 
-    const visibleFavorites = showAllFavorites
+    const hasRemainingTopGames = topGames.length > cardsPerRow;
+
+    const visibleFavorites = showAllGames
         ? favorites
         : hasRemaining
-          ? favorites.slice(0, cardsPerRow - 1) // 👈 aqui está o segredo
+          ? favorites.slice(0, cardsPerRow - 1)
           : favorites;
 
+    const visibleTopGames = showAllGames
+        ? topGames
+        : hasRemainingTopGames
+          ? topGames.slice(0, cardsPerRow - 1)
+          : topGames;
+
     const remainingCount = favorites.length - (cardsPerRow - 1);
+
+    const remainingCountTopGames = topGames.length - (cardsPerRow - 1);
 
     return (
         <AppLayout>
@@ -250,16 +170,16 @@ export default function Profile() {
                     </div>
                 </div>
 
-                <div className="mt-6 px-6 grid gap-4 md:grid-cols-[1.5fr_0.8fr]">
+                <div className="mt-6 grid gap-4 md:grid-cols-[1.5fr_0.8fr]">
                     <div className="grid grid-cols-4 gap-4 rounded-2xl bg-white/[0.03] p-4 ring-1 ring-white/10">
                         <Stat
                             title="Total de Jogos"
-                            value={formatCompactNumber(userMOCKED.ownedGames.length)}
+                            value={formatCompactNumber(user.ownedGames.length)}
                         />
                         <Stat title="Jogos Jogados" value={formatCompactNumber(playedGamesCount)} />
                         <Stat
                             title="Horas Jogadas"
-                            value={formatCompactNumber(playtimeForeverSum)}
+                            value={formatCompactNumber(playtimeForeverSum / 60)}
                         />
                         <Stat
                             title="Conquistas"
@@ -282,14 +202,49 @@ export default function Profile() {
             <div className="mt-10">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-white">Lista de favoritos</h2>
+                    <div className="flex items-center gap-2">
+                        <div className="h-5 w-1 rounded bg-violet-500" />
+                        <h2 className="text-lg font-semibold text-white">Jogos Mais Jogados</h2>
+                    </div>
+
+                    {topGames.length > cardsPerRow && (
+                        <button
+                            onClick={() => setShowAllGames((prev) => !prev)}
+                            className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
+                        >
+                            {showAllGames ? "Mostrar menos" : "Ver todos"}
+                        </button>
+                    )}
+                </div>
+
+                {/* Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    {visibleTopGames.map((fav) => (
+                        <TopGamesCard game={fav} />
+                    ))}
+
+                    {!showAllGames && hasRemainingTopGames && (
+                        <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600/40 to-violet-900/40 text-white font-semibold">
+                            +{remainingCountTopGames}
+                            <span className="block text-xs text-white/60 ml-1">outros jogos</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+            <div className="mt-10">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                        <div className="h-5 w-1 rounded bg-violet-500" />
+                        <h2 className="text-lg font-semibold text-white">Lista de favoritos</h2>
+                    </div>
 
                     {favorites.length > cardsPerRow && (
                         <button
-                            onClick={() => setShowAllFavorites((prev) => !prev)}
+                            onClick={() => setShowAllGames((prev) => !prev)}
                             className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
                         >
-                            {showAllFavorites ? "Mostrar menos" : "Ver todos"}
+                            {showAllGames ? "Mostrar menos" : "Ver todos"}
                         </button>
                     )}
                 </div>
@@ -297,10 +252,10 @@ export default function Profile() {
                 {/* Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                     {visibleFavorites.map((fav) => (
-                        <FavoriteCard key={fav.appid} game={fav.gameDetails} />
+                        <FavoriteCard appid={fav.appid} game={fav.gameDetails} />
                     ))}
 
-                    {!showAllFavorites && hasRemaining && (
+                    {!showAllGames && hasRemaining && (
                         <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600/40 to-violet-900/40 text-white font-semibold">
                             +{remainingCount}
                             <span className="block text-xs text-white/60 ml-1">outros jogos</span>

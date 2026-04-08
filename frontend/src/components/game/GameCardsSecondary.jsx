@@ -18,7 +18,7 @@ export default function GameCardsSecondary({ game, index, favoriteIds, toggleFav
         >
             <span className="w-4 text-sm text-white/45">{index + 2}</span>
 
-            <img src={game.image} alt={game.name} className="h-12 w-20 rounded-lg object-cover" />
+            <img src={game.image} alt={game.name} className="h-12 rounded-lg object-cover" />
 
             <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-white">{game.name}</p>

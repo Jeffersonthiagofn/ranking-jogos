@@ -105,6 +105,16 @@ export const resolvers = {
             return result[0]?.total || 0;
         },
 
+        getGenres: async () => {
+            const genres = await Game.aggregate([
+                { $unwind: "$genres" },
+                { $group: { _id: "$genres" } },
+                { $sort: { _id: 1 } },
+            ]);
+
+            return genres.map((g) => g._id);
+        },
+
         getMostPopularGames: async (_, { limit = 5 }) => {
             return await Game.aggregate([
                 {
@@ -126,10 +136,142 @@ export const resolvers = {
             ]);
         },
 
+        getMyTopGames: async (_, __, context) => {
+            if (!context.user) throw new Error("Unauthorized");
+
+            const user = await User.findById(context.user.id);
+
+            if (!user || !user.ownedGames) return [];
+
+            const sortedGames = user.ownedGames.sort(
+                (a, b) => b.playtime_forever - a.playtime_forever,
+            );
+
+            const appIds = sortedGames.map((g) => g.appid);
+
+            const games = await Game.find({ appid: { $in: appIds } });
+
+            const gamesMap = new Map(games.map((g) => [g.appid, g]));
+
+            const result = sortedGames
+                .map((g) => {
+                    const gameDetails = gamesMap.get(g.appid);
+
+                    if (!gameDetails) return null;
+
+                    return {
+                        ...gameDetails.toObject(),
+                        playtime_forever: g.playtime_forever,
+                    };
+                })
+                .filter(Boolean);
+
+            return result;
+        },
+
         searchGames: async (_, { query }) => {
             return Game.find({
                 name: { $regex: query, $options: "i" },
             }).limit(4);
+        },
+
+        getGamesFiltered: async (_, { genre, sort = "popular", limit = 10, offset = 0 }) => {
+            let matchStage = {};
+
+            if (genre) {
+                matchStage.genres = genre;
+            }
+
+            let basePipeline = [{ $match: matchStage }];
+
+            basePipeline.push({
+                $addFields: {
+                    popularityScore: {
+                        $multiply: [
+                            { $ifNull: ["$ranking_data.score", 0] },
+                            {
+                                $log10: {
+                                    $add: [{ $ifNull: ["$ranking_data.positive_votes", 0] }, 1],
+                                },
+                            },
+                        ],
+                    },
+                    // numericPrice: {
+                    //     $convert: {
+                    //         input: {
+                    //             $replaceAll: {
+                    //                 input: {
+                    //                     $replaceAll: {
+                    //                         input: {
+                    //                             $replaceAll: {
+                    //                                 input: "$price",
+                    //                                 find: "R$",
+                    //                                 replacement: "",
+                    //                             },
+                    //                         },
+                    //                         find: ".",
+                    //                         replacement: "",
+                    //                     },
+                    //                 },
+                    //                 find: ",",
+                    //                 replacement: ".",
+                    //             },
+                    //         },
+                    //         to: "double",
+                    //         onError: null,
+                    //         onNull: null,
+                    //     },
+                    // },
+                    parsedDate: {
+                        $dateFromString: {
+                            dateString: "$release_date",
+                            format: "%d %b, %Y",
+                            onError: null,
+                        },
+                    },
+                },
+            });
+
+            let sortStage = {};
+
+            switch (sort) {
+                case "players":
+                    sortStage = { current_players: -1 };
+                    break;
+
+                case "release":
+                    sortStage = { parsedDate: -1 };
+                    break;
+
+                case "price_desc":
+                    basePipeline.push({ $match: { numericPrice: { $ne: null } } });
+                    sortStage = { numericPrice: -1 };
+                    break;
+
+                case "price_asc":
+                    basePipeline.push({ $match: { numericPrice: { $ne: null } } });
+                    sortStage = { numericPrice: 1 };
+                    break;
+
+                default:
+                    sortStage = { popularityScore: -1 };
+            }
+
+            const totalResult = await Game.aggregate([...basePipeline, { $count: "total" }]);
+
+            const total = totalResult[0]?.total || 0;
+
+            const games = await Game.aggregate([
+                ...basePipeline,
+                { $sort: sortStage },
+                { $skip: offset },
+                { $limit: limit },
+            ]);
+
+            return {
+                games,
+                total,
+            };
         },
     },
 

@@ -20,3 +20,19 @@ export async function getMyFavorites() {
     const data = await graphqlRequest(query);
     return data.getMe.favorites;
 }
+
+export async function getMyTopGames() {
+    const query = `
+        query {
+            getMyTopGames {
+                appid
+                name
+                cover
+                playtime_forever
+            }
+        }
+    `;
+
+    const data = await graphqlRequest(query);
+    return data.getMyTopGames;
+}

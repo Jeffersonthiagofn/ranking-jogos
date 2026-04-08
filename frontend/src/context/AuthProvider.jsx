@@ -15,6 +15,17 @@ export function AuthProvider({ children }) {
                         id
                         name
                         avatar
+                        steamId
+                        ownedGames {
+                            appid
+                            playtime_forever
+                            completed_achievements
+                            total_achievements
+                            unlocked_achievements 
+                        }
+                        favorites {
+                            appid
+                        }
                     }
                 }
             `;

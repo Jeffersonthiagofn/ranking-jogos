@@ -120,7 +120,7 @@ export default function GameDetails() {
             </div>
             <section className="pb-12 text-white">
                 <div className="flex items-center gap-2">
-                    <div className="h-4 w-1 rounded bg-violet-500" />
+                    <div className="h-5 w-1 rounded bg-violet-500" />
                     <h2 className="text-lg font-semibold">Descrição</h2>
                 </div>
 

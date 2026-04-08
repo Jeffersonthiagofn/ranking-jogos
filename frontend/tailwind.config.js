@@ -1,12 +1,10 @@
 /** @type {import('tailwindcss').Config} */
-export default {
-    content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
-    theme: {
-        extend: {
-            fontFamily: {
-                sans: ["Inter", "sans-serif"],
-            },
+export const content = ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"];
+export const theme = {
+    extend: {
+        fontFamily: {
+            sans: ["Inter", "sans-serif"],
         },
     },
-    plugins: [],
 };
+export const plugins = [require("tailwind-scrollbar")];

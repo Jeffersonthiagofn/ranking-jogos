@@ -34,6 +34,7 @@
     "mongoose": "^9.2.1",
     "node-cron": "^4.2.1",
     "passport": "^0.7.0",
-    "passport-steam": "^1.0.18"
+    "passport-steam": "^1.0.18",
+    "tailwind-scrollbar": "^4.0.2"
   }
 }

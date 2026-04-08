@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { NavLink } from "react-router-dom";
 import { ChevronRight, Sparkles, Users, BarChart3 } from "lucide-react";
 import AppLayout from "../layouts/AppLayout";
 import GameCardFeatured from "../components/game/GameCardFeatured";
@@ -79,8 +80,8 @@ export default function Dashboard() {
 
     return (
         <AppLayout>
+            <div className="absolute z-0 inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.15),transparent_65%)]" />
             <section className="grid gap-10 xl:grid-cols-[1.15fr_0.85fr]">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.15),transparent_65%)]" />
                 <div>
                     <h1 className="text-5xl font-semibold leading-tight tracking-tight text-white">
                         Descubra o que
@@ -96,10 +97,12 @@ export default function Dashboard() {
                     </p>
 
                     <div className="mt-8 flex flex-wrap items-center gap-4">
-                        <button className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white hover:opacity-95">
-                            Explore Rankings
-                            <ChevronRight className="h-4 w-4" />
-                        </button>
+                        <NavLink to={"/ranking"} className={"cursor-pointer z-10"}>
+                            <button className=" inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white hover:opacity-95">
+                                Explore Rankings
+                                <ChevronRight className="h-4 w-4" />
+                            </button>
+                        </NavLink>
                     </div>
 
                     <div className="mt-10 grid grid-cols-3 gap-8">
@@ -141,7 +144,7 @@ export default function Dashboard() {
                         {error}
                     </div>
                 ) : featuredGame ? (
-                    <div className="grid gap-6 xl:grid-cols-[1.65fr_0.85fr]">
+                    <div className="grid gap-6 xl:grid-cols-[1.65fr_1.03fr]">
                         <GameCardFeatured
                             game={featuredGame}
                             featured
