@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { ChevronRight, Sparkles, Users, BarChart3 } from "lucide-react";
 import AppLayout from "../layouts/AppLayout";
 import GameCardFeatured from "../components/game/GameCardFeatured";
 import GameCardsSecondary from "../components/game/GameCardsSecondary";
-import { fetchFavorites, getDashboardGames } from "../services/dashboardService";
-import { toggleFavoriteRequest } from "../services/authService";
+import { getDashboardGames } from "../services/dashboardService";
+import { toggleFavorite, fetchFavorites } from "../services/gameService";
 import { formatCompactNumber } from "../utils/dataChanges";
+import Modal from "../components/Modal";
 
 export default function Dashboard() {
     const [mostPopularGames, setMostPopularGames] = useState([]);
@@ -15,6 +16,8 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [favoriteIds, setFavoriteIds] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         let mounted = true;
@@ -54,30 +57,11 @@ export default function Dashboard() {
     const featuredGame = mostPopularGames[0] || null;
     const trendingGames = mostPopularGames.slice(1, 5);
 
-    async function toggleFavorite(gameId) {
-        const intGameId = parseInt(gameId);
-        setFavoriteIds((prev) => {
-            return prev.includes(intGameId)
-                ? prev.filter((id) => id !== intGameId)
-                : [...prev, intGameId];
-        });
-        try {
-            const updatedFavorites = await toggleFavoriteRequest(intGameId);
-
-            const ids = updatedFavorites.map((f) => Number(f.appid));
-
-            setFavoriteIds(ids);
-        } catch (err) {
-            console.error("Erro ao favoritar:", err);
-        }
-    }
-
     const sortedByScore = useMemo(() => {
         return [...mostPopularGames].sort((a, b) => (b.score || 0) - (a.score || 0));
     }, [mostPopularGames]);
 
     const comparisonGames = sortedByScore.slice(0, 2);
-
     return (
         <AppLayout>
             <div className="absolute z-0 inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.15),transparent_65%)]" />
@@ -150,7 +134,9 @@ export default function Dashboard() {
                             featured
                             rank={1}
                             favoriteIds={favoriteIds}
+                            setFavoriteIds={setFavoriteIds}
                             onToggleFavorite={toggleFavorite}
+                            setIsModalOpen={setIsModalOpen}
                         />
 
                         <div className="rounded-3xl bg-white/[0.03] p-6 ring-1 ring-white/10 backdrop-blur">
@@ -174,7 +160,9 @@ export default function Dashboard() {
                                             game={game}
                                             index={index}
                                             favoriteIds={favoriteIds}
+                                            setFavoriteIds={setFavoriteIds}
                                             toggleFavorite={toggleFavorite}
+                                            setIsModalOpen={setIsModalOpen}
                                         />
                                     ))
                                 )}
@@ -294,6 +282,33 @@ export default function Dashboard() {
                     </p>
                 </div>
             </section>
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                <div className="text-center">
+                    <h2 className="text-lg font-semibold text-white mb-2">
+                        Você precisa estar logado
+                    </h2>
+
+                    <p className="text-sm text-white/60 mb-6">
+                        Faça login para adicionar jogos aos favoritos.
+                    </p>
+
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setIsModalOpen(false)}
+                            className="flex-1 rounded-lg bg-white/5 py-2 text-white hover:bg-white/10"
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            onClick={() => navigate("/login")}
+                            className="flex-1 rounded-lg  py-2 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/10 hover:opacity-95 active:opacity-90"
+                        >
+                            Entrar
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </AppLayout>
     );
 }

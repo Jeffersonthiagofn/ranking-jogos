@@ -1,8 +1,18 @@
 import { Heart } from "lucide-react";
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
-export default function GameCardsSecondary({ game, index, favoriteIds, toggleFavorite }) {
+export default function GameCardsSecondary({
+    game,
+    index,
+    favoriteIds,
+    setFavoriteIds,
+    toggleFavorite,
+    setIsModalOpen,
+}) {
     const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
 
     function handleNavigate() {
         navigate(`/game/${game.appid}`, {
@@ -29,7 +39,11 @@ export default function GameCardsSecondary({ game, index, favoriteIds, toggleFav
                 type="button"
                 onClick={(e) => {
                     e.stopPropagation();
-                    toggleFavorite?.(game.appid);
+                    if (!user) {
+                        setIsModalOpen(true);
+                    } else {
+                        toggleFavorite?.(game.appid, setFavoriteIds);
+                    }
                 }}
                 className="grid h-9 w-9 place-items-center rounded-full bg-white/[0.03] ring-1 ring-white/10 hover:bg-white/[0.06]"
             >

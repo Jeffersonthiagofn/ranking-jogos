@@ -144,7 +144,11 @@ export default function Navbar() {
                                 className="h-10 w-10 overflow-hidden rounded-full ring-1 ring-white/10 hover:ring-white/20"
                                 aria-label="Perfil"
                             >
-                                <img src={user.avatar} alt="profile" className=" rounded-full" />
+                                <img
+                                    src={user.steamId ? user.avatar : profileImg}
+                                    alt="profile"
+                                    className=" rounded-full"
+                                />
                             </button>
                         </NavItem>
                     ) : (

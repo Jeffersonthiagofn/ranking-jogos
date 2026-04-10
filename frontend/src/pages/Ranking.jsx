@@ -1,45 +1,10 @@
-import { useEffect, useState } from "react";
-import { fetchGames, fetchGenres } from "../services/gameService";
-import AppLayout from "../layouts/AppLayout";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { fetchFavorites, fetchGames, fetchGenres, toggleFavorite } from "../services/gameService";
 import { ChevronDown, Heart, X } from "lucide-react";
-
-const mockGames = [
-    {
-        appid: 1,
-        name: "Stardew Valley",
-        price: "R$ 12,49",
-        release_date: "26 Fev. de 2016",
-        thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/413150/capsule_231x87.jpg",
-    },
-    {
-        appid: 2,
-        name: "CS2",
-        price: "Gratuito",
-        release_date: "27 Set. de 2023",
-        thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/730/capsule_231x87.jpg",
-    },
-    {
-        appid: 3,
-        name: "Elden Ring",
-        price: "R$ 199,50",
-        release_date: "25 Fev. de 2022",
-        thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/capsule_231x87.jpg",
-    },
-    {
-        appid: 4,
-        name: "Palworld",
-        price: "R$ 125,00",
-        release_date: "19 Jan. de 2024",
-        thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/1623730/capsule_231x87.jpg",
-    },
-    {
-        appid: 5,
-        name: "Cyberpunk 2077",
-        price: "R$ 199,90",
-        release_date: "10 Dez. de 2020",
-        thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/capsule_231x87.jpg",
-    },
-];
+import AppLayout from "../layouts/AppLayout";
+import Modal from "../components/Modal";
+import { AuthContext } from "../context/AuthContext";
 
 const sortMap = {
     "Mais populares": "popular",
@@ -66,11 +31,18 @@ export default function Ranking() {
     const [selectedSort, setSelectedSort] = useState("Mais populares");
     const [openGenre, setOpenGenre] = useState(false);
     const [openSort, setOpenSort] = useState(false);
+    const [favoriteIds, setFavoriteIds] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { user } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const genreRef = useRef(null);
+    const sortRef = useRef(null);
 
     const limit = 10;
     const totalPages = Math.ceil(total / limit);
 
     useEffect(() => {
+        fetchFavorites(setFavoriteIds);
         async function loadGenres() {
             try {
                 const data = await fetchGenres();
@@ -79,8 +51,23 @@ export default function Ranking() {
                 console.error("Erro ao buscar gêneros:", err);
             }
         }
-
         loadGenres();
+
+        function handleClickOutside(event) {
+            if (genreRef.current && !genreRef.current.contains(event.target)) {
+                setOpenGenre(false);
+            }
+
+            if (sortRef.current && !sortRef.current.contains(event.target)) {
+                setOpenSort(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
 
     useEffect(() => {
@@ -137,9 +124,12 @@ export default function Ranking() {
 
                         <div className="flex gap-3">
                             {/* GENRES DROPDOWN */}
-                            <div className="relative">
+                            <div ref={genreRef} className="relative">
                                 <button
-                                    onClick={() => setOpenGenre(!openGenre)}
+                                    onClick={() => {
+                                        setOpenGenre(!openGenre);
+                                        setOpenSort(false);
+                                    }}
                                     className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm text-white ${selectedGenre !== "Gêneros" ? "bg-violet-500/20 hover:bg-[rgb(59,47,112)]" : "bg-[#1a1f2e] hover:bg-[#22283a]"}`}
                                 >
                                     {/* Se tiver filtro ativo, mostra X */}
@@ -180,9 +170,12 @@ export default function Ranking() {
                             </div>
 
                             {/* SORT DROPDOWN */}
-                            <div className="relative">
+                            <div ref={sortRef} className="relative">
                                 <button
-                                    onClick={() => setOpenSort(!openSort)}
+                                    onClick={() => {
+                                        setOpenSort(!openSort);
+                                        setOpenGenre(false);
+                                    }}
                                     className="flex items-center gap-2 rounded-lg bg-violet-500/20 px-4 py-2 text-sm text-white hover:bg-[rgb(59,47,112)]"
                                 >
                                     {selectedSort}
@@ -222,10 +215,13 @@ export default function Ranking() {
                     <div className="divide-y divide-white/5">
                         {games.map((game, index) => (
                             <div
+                                onClick={() => navigate(`/game/${game.appid}`)}
                                 key={game.appid}
-                                className="grid grid-cols-[60px_1fr_200px_120px_60px] items-center py-4 px-2 hover:bg-white/5 rounded-lg transition"
+                                className="cursor-pointer grid grid-cols-[60px_1fr_200px_120px_60px] items-center py-4 px-2 hover:bg-white/5 rounded-lg transition"
                             >
-                                <span className="text-violet-400 font-semibold">#{index + 1}</span>
+                                <span className="text-violet-400 font-semibold">
+                                    #{(page - 1) * limit + index + 1}
+                                </span>
 
                                 <div className="flex items-center gap-3">
                                     <img
@@ -239,8 +235,25 @@ export default function Ranking() {
                                 <span className="text-white/60 text-sm">{game.release_date}</span>
                                 <span className="text-white text-sm">{game.price}</span>
 
-                                <button className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 hover:bg-white/10">
-                                    <Heart size={16} />
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (!user) {
+                                            setIsModalOpen(true);
+                                        } else {
+                                            toggleFavorite?.(game.appid, setFavoriteIds);
+                                        }
+                                    }}
+                                    className="grid h-9 w-9 place-items-center rounded-full bg-white/[0.03] ring-1 ring-white/10 hover:bg-white/[0.06]"
+                                >
+                                    <Heart
+                                        className={`h-4 w-4 ${
+                                            favoriteIds.includes(Number(game.appid))
+                                                ? "fill-violet-400 text-violet-300"
+                                                : "text-white/60"
+                                        }`}
+                                    />
                                 </button>
                             </div>
                         ))}
@@ -285,6 +298,33 @@ export default function Ranking() {
                     </div>
                 </div>
             </div>
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                <div className="text-center">
+                    <h2 className="text-lg font-semibold text-white mb-2">
+                        Você precisa estar logado
+                    </h2>
+
+                    <p className="text-sm text-white/60 mb-6">
+                        Faça login para adicionar jogos aos favoritos.
+                    </p>
+
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setIsModalOpen(false)}
+                            className="flex-1 rounded-lg bg-white/5 py-2 text-white hover:bg-white/10"
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            onClick={() => navigate("/login")}
+                            className="flex-1 rounded-lg  py-2 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/10 hover:opacity-95 active:opacity-90"
+                        >
+                            Entrar
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </AppLayout>
     );
 }

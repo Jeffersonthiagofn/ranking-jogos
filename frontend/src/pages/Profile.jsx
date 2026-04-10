@@ -1,5 +1,6 @@
 import AppLayout from "../layouts/AppLayout";
 import backgroundImg from "../assets/background-profile.png";
+import profileImg from "../assets/image-profile.avif";
 import { useEffect, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -8,6 +9,7 @@ import { formatCompactNumber } from "../utils/dataChanges";
 import { getMyTopGames, getMyFavorites } from "../services/profileService";
 import FavoriteCard from "../components/game/FavoriteCard";
 import TopGamesCard from "../components/TopGamesCard";
+import { linkSteamAccount } from "../services/authService";
 
 function Stat({ title, value, subtitle }) {
     return (
@@ -128,7 +130,7 @@ export default function Profile() {
                     <div className="relative z-10 flex items-center gap-6 px-6 py-6">
                         <div className="relative">
                             <img
-                                src={user.avatar}
+                                src={user.steamId ? user.avatar : profileImg}
                                 alt="profile"
                                 className="h-20 w-20 rounded-full ring-4 ring-violet-500/40"
                             />
@@ -170,67 +172,101 @@ export default function Profile() {
                     </div>
                 </div>
 
-                <div className="mt-6 grid gap-4 md:grid-cols-[1.5fr_0.8fr]">
-                    <div className="grid grid-cols-4 gap-4 rounded-2xl bg-white/[0.03] p-4 ring-1 ring-white/10">
-                        <Stat
-                            title="Total de Jogos"
-                            value={formatCompactNumber(user.ownedGames.length)}
-                        />
-                        <Stat title="Jogos Jogados" value={formatCompactNumber(playedGamesCount)} />
-                        <Stat
-                            title="Horas Jogadas"
-                            value={formatCompactNumber(playtimeForeverSum / 60)}
-                        />
-                        <Stat
-                            title="Conquistas"
-                            value={formatCompactNumber(completed_achievementsSum)}
-                            subtitle={totalAchievementsSumFormated}
-                        />
-                    </div>
+                <div className="relative">
+                    <div
+                        className={`${
+                            user?.steamId
+                                ? ""
+                                : " blur-none opacity-90 pointer-events-none select-none"
+                        }`}
+                    >
+                        <div className="py-1 px-1 mt-6 grid gap-4 md:grid-cols-[1.5fr_0.8fr]">
+                            <div className="grid grid-cols-4 gap-4 rounded-2xl bg-white/[0.03] p-4 ring-1 ring-white/10">
+                                <Stat
+                                    title="Total de Jogos"
+                                    value={formatCompactNumber(user.ownedGames.length)}
+                                />
+                                <Stat
+                                    title="Jogos Jogados"
+                                    value={formatCompactNumber(playedGamesCount)}
+                                />
+                                <Stat
+                                    title="Horas Jogadas"
+                                    value={formatCompactNumber(playtimeForeverSum / 60)}
+                                />
+                                <Stat
+                                    title="Conquistas"
+                                    value={formatCompactNumber(completed_achievementsSum)}
+                                    subtitle={totalAchievementsSumFormated}
+                                />
+                            </div>
 
-                    <div className="rounded-2xl bg-gradient-to-r from-violet-500/20 to-indigo-500/20 p-4 ring-1 ring-violet-400/20">
-                        <p className="text-sm text-white/70">Nível 1</p>
+                            <div className="rounded-2xl bg-gradient-to-r from-violet-500/20 to-indigo-500/20 p-4 ring-1 ring-violet-400/20">
+                                <p className="text-sm text-white/70">Nível 1</p>
 
-                        <div className="mt-3 h-2 w-full rounded-full bg-white/10">
-                            <div className="h-2 w-[10%] rounded-full bg-violet-400" />
+                                <div className="mt-3 h-2 w-full rounded-full bg-white/10">
+                                    <div className="h-2 w-[10%] rounded-full bg-violet-400" />
+                                </div>
+
+                                <p className="mt-2 text-xs text-white/50">100 / 1,000 XP</p>
+                            </div>
                         </div>
-
-                        <p className="mt-2 text-xs text-white/50">100 / 1,000 XP</p>
-                    </div>
-                </div>
-            </div>
-            <div className="mt-10">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                        <div className="h-5 w-1 rounded bg-violet-500" />
-                        <h2 className="text-lg font-semibold text-white">Jogos Mais Jogados</h2>
                     </div>
 
-                    {topGames.length > cardsPerRow && (
-                        <button
-                            onClick={() => setShowAllGames((prev) => !prev)}
-                            className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
-                        >
-                            {showAllGames ? "Mostrar menos" : "Ver todos"}
-                        </button>
-                    )}
-                </div>
-
-                {/* Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                    {visibleTopGames.map((fav) => (
-                        <TopGamesCard game={fav} />
-                    ))}
-
-                    {!showAllGames && hasRemainingTopGames && (
-                        <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600/40 to-violet-900/40 text-white font-semibold">
-                            +{remainingCountTopGames}
-                            <span className="block text-xs text-white/60 ml-1">outros jogos</span>
+                    {!user?.steamId && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-xl">
+                            <button
+                                onClick={linkSteamAccount}
+                                className="rounded-xl bg-violet-500 px-5 py-3 text-white font-medium hover:bg-violet-600 transition"
+                            >
+                                Sincronizar com a Steam
+                            </button>
                         </div>
                     )}
                 </div>
             </div>
+            {user.steamId ? (
+                <>
+                    <div className="mt-10">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <div className="h-5 w-1 rounded bg-violet-500" />
+                                <h2 className="text-lg font-semibold text-white">
+                                    Jogos Mais Jogados
+                                </h2>
+                            </div>
+
+                            {topGames.length > cardsPerRow && (
+                                <button
+                                    onClick={() => setShowAllGames((prev) => !prev)}
+                                    className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
+                                >
+                                    {showAllGames ? "Mostrar menos" : "Ver todos"}
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                            {visibleTopGames.map((fav) => (
+                                <TopGamesCard game={fav} />
+                            ))}
+
+                            {!showAllGames && hasRemainingTopGames && (
+                                <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600/40 to-violet-900/40 text-white font-semibold">
+                                    +{remainingCountTopGames}
+                                    <span className="block text-xs text-white/60 ml-1">
+                                        outros jogos
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <></>
+            )}
             <div className="mt-10">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">

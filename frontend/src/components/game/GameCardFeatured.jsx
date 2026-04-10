@@ -1,17 +1,22 @@
 import { Star, Heart, Users } from "lucide-react";
 import { formatCompactNumber, scoreToStars } from "../../utils/dataChanges";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function GameCardFeatured({
     game,
     favoriteIds,
+    setFavoriteIds,
     onToggleFavorite,
     featured = false,
     rank = 1,
+    setIsModalOpen,
 }) {
     if (!game) return null;
 
     const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
 
     function handleNavigate() {
         navigate(`/game/${game.appid}`, {
@@ -42,7 +47,11 @@ export default function GameCardFeatured({
                         type="button"
                         onClick={(e) => {
                             e.stopPropagation();
-                            onToggleFavorite?.(game.appid);
+                            if (!user) {
+                                setIsModalOpen(true);
+                            } else {
+                                onToggleFavorite?.(game.appid, setFavoriteIds);
+                            }
                         }}
                         className="grid h-10 w-10 place-items-center rounded-full bg-black/30 backdrop-blur ring-1 ring-white/10 hover:bg-black/45"
                     >

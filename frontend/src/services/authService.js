@@ -42,8 +42,9 @@ export const loginWithSteam = () => {
     window.location.href = `${backendUrl}/auth/steam`;
 };
 
-export const linkSteamAccount = (token) => {
+export const linkSteamAccount = () => {
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const token = localStorage.getItem("token");
 
     window.location.href = `${backendUrl}/auth/steam?token=${token}`;
 };
