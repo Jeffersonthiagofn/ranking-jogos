@@ -24,7 +24,8 @@ function Stat({ title, value, subtitle }) {
 
 export default function Profile() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [showAllGames, setShowAllGames] = useState(false);
+    const [showAllTopGames, setShowAllTopGames] = useState(false);
+    const [showAllFavoriteGames, setShowAllFavoriteGames] = useState(false);
     const [favorites, setFavorites] = useState([]);
     const [topGames, setTopGames] = useState([]);
     const [loadingFavorites, setLoadingFavorites] = useState(true);
@@ -99,13 +100,13 @@ export default function Profile() {
 
     const hasRemainingTopGames = topGames.length > cardsPerRow;
 
-    const visibleFavorites = showAllGames
+    const visibleFavorites = showAllFavoriteGames
         ? favorites
         : hasRemaining
           ? favorites.slice(0, cardsPerRow - 1)
           : favorites;
 
-    const visibleTopGames = showAllGames
+    const visibleTopGames = showAllTopGames
         ? topGames
         : hasRemainingTopGames
           ? topGames.slice(0, cardsPerRow - 1)
@@ -239,10 +240,10 @@ export default function Profile() {
 
                             {topGames.length > cardsPerRow && (
                                 <button
-                                    onClick={() => setShowAllGames((prev) => !prev)}
+                                    onClick={() => setShowAllTopGames((prev) => !prev)}
                                     className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
                                 >
-                                    {showAllGames ? "Mostrar menos" : "Ver todos"}
+                                    {showAllTopGames ? "Mostrar menos" : "Ver todos"}
                                 </button>
                             )}
                         </div>
@@ -253,7 +254,7 @@ export default function Profile() {
                                 <TopGamesCard game={fav} />
                             ))}
 
-                            {!showAllGames && hasRemainingTopGames && (
+                            {!showAllTopGames && hasRemainingTopGames && (
                                 <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600/40 to-violet-900/40 text-white font-semibold">
                                     +{remainingCountTopGames}
                                     <span className="block text-xs text-white/60 ml-1">
@@ -277,10 +278,10 @@ export default function Profile() {
 
                     {favorites.length > cardsPerRow && (
                         <button
-                            onClick={() => setShowAllGames((prev) => !prev)}
+                            onClick={() => setShowAllFavoriteGames((prev) => !prev)}
                             className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
                         >
-                            {showAllGames ? "Mostrar menos" : "Ver todos"}
+                            {showAllFavoriteGames ? "Mostrar menos" : "Ver todos"}
                         </button>
                     )}
                 </div>
@@ -291,7 +292,7 @@ export default function Profile() {
                         <FavoriteCard appid={fav.appid} game={fav.gameDetails} />
                     ))}
 
-                    {!showAllGames && hasRemaining && (
+                    {!showAllFavoriteGames && hasRemaining && (
                         <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600/40 to-violet-900/40 text-white font-semibold">
                             +{remainingCount}
                             <span className="block text-xs text-white/60 ml-1">outros jogos</span>
