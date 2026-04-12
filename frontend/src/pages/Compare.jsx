@@ -85,7 +85,9 @@ function ComparisonMetrics({ leftGame, rightGame }) {
                             <span className="flex justify-start items-center w-32">
                                 {leftValue == "Gratuito"
                                     ? leftValue
-                                    : formatCompactNumber(leftValue)}
+                                    : metric.key == "price"
+                                      ? `R$ ${formatCompactNumber(leftValue)}`
+                                      : formatCompactNumber(leftValue)}
                             </span>
                             <div className="flex flex-col items-center gap-2">
                                 {metric.key == "players" ? <Users className={"h-4"} /> : <></>}
