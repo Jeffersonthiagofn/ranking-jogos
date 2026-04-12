@@ -8,6 +8,7 @@ export async function getGameDetails(appid) {
                 name
                 description
                 cover
+                thumb
                 developer
                 release_date
                 genres

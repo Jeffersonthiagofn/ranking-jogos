@@ -1,5 +1,5 @@
 import AppLayout from "../layouts/AppLayout";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getGameDetails } from "../services/gameDetailsService";
 import { CodeXml, Calendar, Heart, Star } from "lucide-react";
@@ -8,6 +8,7 @@ import Achievements from "../components/game/Achievements";
 
 export default function GameDetails() {
     const { appid } = useParams();
+    const navigate = useNavigate();
 
     const [game, setGame] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -111,7 +112,16 @@ export default function GameDetails() {
                                 <span>Adicionar aos Favoritos</span>
                             </div>
 
-                            <button className="rounded-2xl bg-gradient-to-r from-violet-500 to-indigo-500 px-5 py-2 text-sm font-medium text-white shadow-lg hover:opacity-90">
+                            <button
+                                onClick={() => {
+                                    navigate("/compare", {
+                                        state: {
+                                            leftGame: game,
+                                        },
+                                    });
+                                }}
+                                className="rounded-2xl bg-gradient-to-r from-violet-500 to-indigo-500 px-5 py-2 text-sm font-medium text-white shadow-lg hover:opacity-90"
+                            >
                                 Compare
                             </button>
                         </div>

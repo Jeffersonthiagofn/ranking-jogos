@@ -57,11 +57,16 @@ export default function Dashboard() {
     const featuredGame = mostPopularGames[0] || null;
     const trendingGames = mostPopularGames.slice(1, 5);
 
-    const sortedByScore = useMemo(() => {
-        return [...mostPopularGames].sort((a, b) => (b.score || 0) - (a.score || 0));
-    }, [mostPopularGames]);
+    function getRandomGames(games) {
+        if (games.length < 2) return [];
 
-    const comparisonGames = sortedByScore.slice(0, 2);
+        const shuffled = [...games].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, 2);
+    }
+
+    const comparisonGames = getRandomGames(mostPopularGames.slice(0, 5));
+    console.log(comparisonGames[0]);
+
     return (
         <AppLayout>
             <div className="absolute z-0 inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.15),transparent_65%)]" />
@@ -187,10 +192,6 @@ export default function Dashboard() {
                             Coloque dois jogos frente a frente. Nesta fase, a comparação usa score,
                             jogadores ativos e achievements para destacar diferenças.
                         </p>
-
-                        <button className="mt-6 rounded-xl bg-white/[0.03] px-4 py-3 text-sm text-white/75 ring-1 ring-white/10 hover:bg-white/[0.06]">
-                            Acessar comparação completa
-                        </button>
                     </div>
 
                     <div className="rounded-3xl bg-white/[0.03] p-6 ring-1 ring-white/10">
@@ -214,7 +215,17 @@ export default function Dashboard() {
                                     </div>
                                 </div>
 
-                                <button className="rounded-xl bg-white px-2 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-black hover:opacity-95">
+                                <button
+                                    onClick={() => {
+                                        navigate("/compare", {
+                                            state: {
+                                                leftGame: comparisonGames[0],
+                                                rightGame: comparisonGames[1],
+                                            },
+                                        });
+                                    }}
+                                    className="rounded-xl bg-white px-2 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-black hover:opacity-95"
+                                >
                                     Comparar
                                 </button>
 

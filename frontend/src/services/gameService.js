@@ -86,3 +86,29 @@ export async function toggleFavorite(gameId, setFavoriteIds) {
         console.error("Erro ao favoritar:", err);
     }
 }
+
+export async function fetchGameById(appid) {
+    const query = `
+    query($appid: Int!) {
+      getGameByAppId(appid: $appid) {
+        appid
+        name
+        thumb
+        icon
+        developer
+        current_players
+        price
+        ranking_data {
+            score
+        }
+        achievements {
+            name          
+        }
+        
+      }
+    }
+  `;
+
+    const data = await graphqlRequest(query, { appid });
+    return data.getGameByAppId;
+}
