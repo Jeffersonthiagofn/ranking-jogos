@@ -3,7 +3,6 @@ import { Twitter, Github, Youtube, Instagram, Gamepad2 } from "lucide-react";
 export default function Footer() {
     return (
         <footer className="border-t border-white/5 bg-[#0B0B10]">
-            {/* Parte principal do footer */}
             <div className="mx-auto max-w-7xl px-6 pt-12 pb-6">
                 <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
                     <div>
@@ -79,7 +78,6 @@ export default function Footer() {
                 </div>
             </div>
 
-            {/* Linha FULL WIDTH */}
             <div className="border-t border-white/5">
                 <div className="mx-auto max-w-7xl px-6 py-6 text-xs text-white/40 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <span>

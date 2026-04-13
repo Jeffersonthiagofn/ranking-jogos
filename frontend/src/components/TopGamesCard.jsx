@@ -20,7 +20,7 @@ export default function TopGamesCard({ game }) {
 
             <div className="absolute bottom-2 left-2 right-2">
                 <p className="text-sm font-medium text-white truncate">{game.name}</p>
-                <div className="relative right-1.5 flex flex items-center mt-0.5">
+                <div className="relative right-1.5 flex items-center mt-0.5">
                     <Clock className="h-3 text-white/60" />
                     <p className="text-xs font-medium text-white/60 truncate">
                         {formatCompactNumber(game.playtime_forever / 60)} h

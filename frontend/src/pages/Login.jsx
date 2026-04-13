@@ -100,7 +100,6 @@ export default function Login() {
                     {loading ? "Entrando..." : "Entrar"}
                 </GradientButton>
 
-                {/* divider */}
                 <div className="flex items-center gap-3">
                     <div className="h-px flex-1 bg-white/10" />
                     <span className="text-[11px] uppercase tracking-wider text-white/40">ou</span>

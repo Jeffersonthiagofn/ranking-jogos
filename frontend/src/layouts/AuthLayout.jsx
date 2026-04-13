@@ -4,7 +4,6 @@ export default function AuthLayout({ title, subtitle, children, heroImage, brand
     return (
         <div className="min-h-screen bg-[#0B0B10] text-white">
             <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-                {/* LEFT HERO */}
                 <section className="relative hidden lg:block">
                     <img
                         src={heroImage}
@@ -12,12 +11,10 @@ export default function AuthLayout({ title, subtitle, children, heroImage, brand
                         className="absolute inset-0 h-full w-full object-cover"
                     />
 
-                    {/* overlays */}
                     <div className="absolute inset-0 bg-gradient-to-br from-[#120A24]/90 via-[#120A24]/60 to-[#0B0B10]/90" />
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.28),transparent_55%)]" />
 
                     <div className="relative flex h-full flex-col justify-between p-10">
-                        {/* brand */}
                         <div className="flex items-center gap-2 text-white/90">
                             <div className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 ring-1 ring-white/10">
                                 <Gamepad2 className="h-5 w-5 text-violet-300" />
@@ -25,7 +22,6 @@ export default function AuthLayout({ title, subtitle, children, heroImage, brand
                             <span className="text-lg font-semibold">{brand}</span>
                         </div>
 
-                        {/* headline */}
                         <div className="flex flex-1 items-center">
                             <div className="max-w-xl">
                                 <h1 className="text-6xl font-semibold leading-tight tracking-tight">
@@ -42,7 +38,6 @@ export default function AuthLayout({ title, subtitle, children, heroImage, brand
                             </div>
                         </div>
 
-                        {/* badge */}
                         <div className="mt-auto">
                             <div className="inline-flex items-center gap-2 rounded-xl bg-white/5 px-4 py-3 text-sm text-white/70 ring-1 ring-white/10">
                                 <ShieldCheck className="h-4 w-4 text-violet-300" />
@@ -52,7 +47,6 @@ export default function AuthLayout({ title, subtitle, children, heroImage, brand
                     </div>
                 </section>
 
-                {/* RIGHT FORM */}
                 <section className="relative flex items-center justify-center px-6 py-10">
                     <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent" />
 

@@ -10,7 +10,6 @@ export default function CompareCard({ game, onSelect }) {
     const [loadingGame, setLoadingGame] = useState(false);
     const ref = useRef(null);
 
-    // fechar dropdown
     useEffect(() => {
         function handleClickOutside(e) {
             if (ref.current && !ref.current.contains(e.target)) {
@@ -23,7 +22,6 @@ export default function CompareCard({ game, onSelect }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // busca (igual navbar)
     useEffect(() => {
         const delay = setTimeout(async () => {
             if (!query.trim()) {
@@ -52,9 +50,7 @@ export default function CompareCard({ game, onSelect }) {
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px]" />
             </div>
 
-            {/* CONTEÚDO */}
             <div className="relative h-full flex flex-col justify-between p-4">
-                {/* TOP */}
                 <div>
                     <div>
                         {game ? (
@@ -88,7 +84,6 @@ export default function CompareCard({ game, onSelect }) {
                     </div>
                 </div>
 
-                {/* SEARCH */}
                 <div ref={ref} className="relative">
                     <div className="flex items-center gap-2 rounded-lg bg-white/[0.05] px-3 py-2 ring-1 ring-white/10 focus-within:ring-violet-400/40">
                         <Search className="h-4 w-4 text-white/40" />
@@ -100,7 +95,6 @@ export default function CompareCard({ game, onSelect }) {
                         />
                     </div>
 
-                    {/* DROPDOWN */}
                     {query && (
                         <div className="absolute top-12 w-full rounded-xl bg-[#0B0B10] p-2 ring-1 ring-white/10 shadow-xl z-50">
                             {loading ? (

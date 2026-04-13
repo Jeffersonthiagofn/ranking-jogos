@@ -245,7 +245,6 @@ export default function Profile() {
             {user.steamId ? (
                 <>
                     <div className="mt-10">
-                        {/* Header */}
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <div className="h-5 w-1 rounded bg-violet-500" />
@@ -264,7 +263,6 @@ export default function Profile() {
                             )}
                         </div>
 
-                        {/* Grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                             {visibleTopGames.map((fav) => (
                                 <TopGamesCard game={fav} />
@@ -285,7 +283,6 @@ export default function Profile() {
                 <></>
             )}
             <div className="mt-10">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                         <div className="h-5 w-1 rounded bg-violet-500" />
@@ -302,7 +299,6 @@ export default function Profile() {
                     )}
                 </div>
 
-                {/* Grid */}
                 {visibleFavorites.length == 0 ? (
                     <h2 className="w-[21rem] flex justify-center  rounded-xl text-sm font-semibold text-white/50 bg-white/[0.03] p-3 ring-1 ring-white/10">
                         Lista Vazia. Adicione jogos ao seus favoritos

@@ -114,7 +114,6 @@ function ComparisonMetrics({ leftGame, rightGame }) {
                         </div>
 
                         <div className="flex gap-2">
-                            {/* esquerda */}
                             <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-violet-500"
@@ -122,7 +121,6 @@ function ComparisonMetrics({ leftGame, rightGame }) {
                                 />
                             </div>
 
-                            {/* direita */}
                             <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-violet-500"
