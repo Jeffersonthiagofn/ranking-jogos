@@ -45,9 +45,9 @@ const UserSchema = new mongoose.Schema({
             total_achievements: { type: Number, default: 0 },
             achievements: [{ 
                 name: String,
-                description: String, // Changed to match GraphQL
+                description: String,
                 icon: String,
-                completion_percentage: Number // Added to match GraphQL
+                completion_percentage: Number
             }],
         },
     ],

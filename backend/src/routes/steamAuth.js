@@ -9,28 +9,6 @@ const port = process.env.PORT || 3000;
 const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
-const fetchAndFormatSteamGames = async (steamId) => {
-    try {
-        const gamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&format=json&language=${process.env.STEAM_LANG}&include_played_free_games=1&include_appinfo=1`;
-        const gamesRes = await fetch(gamesUrl);
-        const gamesData = await gamesRes.json();
-
-        if (gamesData.response && gamesData.response.games) {
-            return gamesData.response.games.map((game) => ({
-                appid: game.appid,
-                playtime_forever: game.playtime_forever,
-                completed_achievements: 0,
-                total_achievements: 0,
-                unlocked_achievements: [],
-            }));
-        }
-        return [];
-    } catch (error) {
-        console.error(`Failed to fetch games for SteamID ${steamId}:`, error);
-        return [];
-    }
-};
-
 const fetchSteamLevelData = async (steamId) => {
     try {
         const url = `http://api.steampowered.com/IPlayerService/GetBadges/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&language=${process.env.STEAM_LANG}`;
@@ -125,13 +103,21 @@ export const syncSteamDataToUser = async (user, steamId, forceSync = false) => {
 
         console.log(`--- Starting Steam Sync for ${user.name} ---`);
 
-        let ownedGames = await fetchOwnedGames(steamId);
+        const levelData = await fetchSteamLevelData(steamId);
+        if (levelData) {
+            user.steamLevel = levelData.level;
+            user.steamXp = levelData.xp;
+            user.steamXpNeeded = levelData.xpNeeded;
+        }
 
+        let ownedGames = await fetchOwnedGames(steamId);
         ownedGames = await fetchGameAchievements(ownedGames, steamId);
 
         user.ownedGames = ownedGames;
         user.lastSyncedAt = new Date();
+        
         user.markModified("ownedGames");
+        user.markModified("steamLevel"); 
 
         console.log(`--- Sync Complete for ${user.name} ---`);
     } catch (error) {
