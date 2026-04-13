@@ -11,7 +11,7 @@ const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
 const fetchAndFormatSteamGames = async (steamId) => {
     try {
-        const gamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&format=json`;
+        const gamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&format=json&language=${process.env.STEAM_LANG}`;
         const gamesRes = await fetch(gamesUrl);
         const gamesData = await gamesRes.json();
 
@@ -31,6 +31,44 @@ const fetchAndFormatSteamGames = async (steamId) => {
     }
 };
 
+const fetchSteamLevelData = async (steamId) => {
+    try {
+        const url = `http://api.steampowered.com/IPlayerService/GetBadges/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&language=${process.env.STEAM_LANG}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.response && data.response.player_level !== undefined) {
+            return {
+                level: data.response.player_level,
+                xp: data.response.player_xp || 0,
+                xpNeeded: data.response.player_xp_needed_to_level_up || 0
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error(`Failed to fetch level for SteamID ${steamId}:`, error);
+        return null;
+    }
+};
+
+const syncSteamDataToUser = async (user, steamId) => {
+    const [fetchedGames, levelData] = await Promise.all([
+        fetchAndFormatSteamGames(steamId),
+        fetchSteamLevelData(steamId)
+    ]);
+
+    if (fetchedGames && fetchedGames.length > 0) {
+        user.ownedGames = fetchedGames;
+    }
+
+    if (levelData) {
+        user.steamLevel = levelData.level;
+        user.steamXp = levelData.xp;
+        user.steamXpNeeded = levelData.xpNeeded;
+    }
+    
+};
+
 const handleDirectLogin = async (steamId, profile, avatarUrl) => {
     let user = await User.findOne({ steamId: steamId });
     const safeName = profile.displayName || "Steam User";
@@ -46,10 +84,7 @@ const handleDirectLogin = async (steamId, profile, avatarUrl) => {
         user.avatar = avatarUrl;
     }
 
-    const fetchedGames = await fetchAndFormatSteamGames(steamId);
-    if (fetchedGames.length > 0) {
-        user.ownedGames = fetchedGames;
-    }
+    await syncSteamDataToUser(user, steamId);
 
     await user.save();
     console.log("STEAM USER SAVED TO DB:", user.name);
@@ -57,19 +92,19 @@ const handleDirectLogin = async (steamId, profile, avatarUrl) => {
     return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
 
-const handleAccountLinking = async (linkToken, steamId, avatarUrl) => {
+const handleAccountLinking = async (linkToken, steamId, profile, avatarUrl) => {
     const decoded = jwt.verify(linkToken, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
 
     if (!user) throw new Error("User not found");
 
-    user.steamId = steamId;
-    if (!user.avatar) user.avatar = avatarUrl;
+    const safeName = profile.displayName || user.name;
 
-    const fetchedGames = await fetchAndFormatSteamGames(steamId);
-    if (fetchedGames.length > 0) {
-        user.ownedGames = fetchedGames;
-    }
+    user.name = safeName;
+    user.steamId = steamId;
+    user.avatar = avatarUrl;
+
+    await syncSteamDataToUser(user, steamId);
 
     await user.save();
     console.log("ACCOUNT LINKED AND GAMES SYNCED FOR:", user.name);
@@ -117,16 +152,19 @@ router.get(
         try {
             const steamId = req.user.steamId;
             const profile = req.user.profile;
-            const avatarUrl =
-                profile.photos && profile.photos.length > 0 ? profile.photos[2].value : "";
+
+            const avatarUrl = profile._json?.avatarfull 
+                || (profile.photos && profile.photos.length > 0 ? profile.photos[profile.photos.length - 1].value : "")
+                || "";
 
             const linkToken = req.cookies.jwt_link_temp;
 
             if (linkToken) {
-                await handleAccountLinking(linkToken, steamId, avatarUrl);
+                await handleAccountLinking(linkToken, steamId, profile, avatarUrl);
 
                 res.clearCookie("jwt_link_temp");
                 return res.redirect(`${frontendUrl}/profile?linked=true`);
+
             } else {
                 const authToken = await handleDirectLogin(steamId, profile, avatarUrl);
 

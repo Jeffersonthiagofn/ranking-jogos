@@ -33,6 +33,10 @@ const UserSchema = new mongoose.Schema({
 
     avatar: String,
 
+    steamLevel: { type: Number, default: 0 },
+    steamXp: { type: Number, default: 0 },
+    steamXpNeeded: { type: Number, default: 0 },
+
     ownedGames: [
         {
             appid: { type: Number, required: true },
@@ -42,6 +46,8 @@ const UserSchema = new mongoose.Schema({
             unlocked_achievements: [{ type: String }],
         },
     ],
+
+
 
     favorites: [
         {

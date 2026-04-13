@@ -55,6 +55,9 @@ type User {
   email: String
   steamId: String
   avatar: String
+  steamLevel: Int
+  steamXp: Int
+  steamXpNeeded: Int
   ownedGames: [OwnedGame]
   favorites: [Favorite]
 }

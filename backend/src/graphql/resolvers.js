@@ -196,32 +196,6 @@ export const resolvers = {
                             },
                         ],
                     },
-                    // numericPrice: {
-                    //     $convert: {
-                    //         input: {
-                    //             $replaceAll: {
-                    //                 input: {
-                    //                     $replaceAll: {
-                    //                         input: {
-                    //                             $replaceAll: {
-                    //                                 input: "$price",
-                    //                                 find: "R$",
-                    //                                 replacement: "",
-                    //                             },
-                    //                         },
-                    //                         find: ".",
-                    //                         replacement: "",
-                    //                     },
-                    //                 },
-                    //                 find: ",",
-                    //                 replacement: ".",
-                    //             },
-                    //         },
-                    //         to: "double",
-                    //         onError: null,
-                    //         onNull: null,
-                    //     },
-                    // },
                     parsedDate: {
                         $dateFromString: {
                             dateString: "$release_date",

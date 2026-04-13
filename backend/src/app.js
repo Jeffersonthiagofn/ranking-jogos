@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cron from "node-cron";
 import cors from "cors";
-import jwt from "jsonwebtoken"; // 👈 CRITICAL: You need this for the GraphQL context!
+import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";

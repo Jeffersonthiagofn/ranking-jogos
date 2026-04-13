@@ -3,8 +3,8 @@ import axios from 'axios';
 
 
 export const STEAM_CONFIG = {
-  MAX_RESULTS: 100000,
-  HEALTH_THRESHOLD: 80000 
+  MAX_RESULTS: parseInt(process.env.STEAM_MAX_RESULTS) || 100000,
+  HEALTH_THRESHOLD: parseInt(process.env.STEAM_HEALTH_THRESHOLD) || 80000 
 };
 
 // Create global padlock
@@ -58,7 +58,7 @@ export const autoIngestIfEmpty = async () => {
 
     while (moreResults && totalSavedAllPages < STEAM_CONFIG.MAX_RESULTS) {
       
-      const url = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${apiKey}&max_results=50000&last_appid=${lastAppId}`;
+      const url = `https://api.steampowered.com/IStoreService/GetAppList/v1/?key=${apiKey}&max_results=50000&last_appid=${lastAppId}&language=${process.env.STEAM_LANG}`;
       const response = await axios.get(url);
       const data = response.data.response;
 
@@ -117,7 +117,7 @@ export const updateGameDetails = async () => {
 
     for (const game of gamesToUpdate) {
       try {
-        const storeUrl = `https://store.steampowered.com/api/appdetails?appids=${game.appid}`;
+        const storeUrl = `https://store.steampowered.com/api/appdetails?appids=${game.appid}&l=${process.env.STEAM_LANG}&cc=${process.env.STEAM_CC}`;
         const storeResponse = await axios.get(storeUrl);
         const gameData = storeResponse.data[game.appid];
 
@@ -144,7 +144,7 @@ export const updateGameDetails = async () => {
 
           try {
             const apiKey = process.env.STEAM_API_KEY;
-            const schemaUrl = `https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${apiKey}&appid=${game.appid}`;
+            const schemaUrl = `https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${apiKey}&appid=${game.appid}&l=${process.env.STEAM_LANG}`;
             const schemaResponse = await axios.get(schemaUrl);
             const stats = schemaResponse.data.game?.availableGameStats;
 
@@ -183,7 +183,7 @@ export const updateGameDetails = async () => {
           }
 
           try {
-            const playerUrl = `https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${game.appid}`;
+            const playerUrl = `https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${game.appid}&language=${process.env.STEAM_LANG}`;
             const playerResponse = await axios.get(playerUrl);
             
             if (playerResponse.data.response && playerResponse.data.response.result === 1) {
