@@ -33,13 +33,22 @@ const UserSchema = new mongoose.Schema({
 
     avatar: String,
 
+    steamLevel: { type: Number, default: 0 },
+    steamXp: { type: Number, default: 0 },
+    steamXpNeeded: { type: Number, default: 0 },
+
     ownedGames: [
         {
             appid: { type: Number, required: true },
             playtime_forever: { type: Number, default: 0 },
             completed_achievements: { type: Number, default: 0 },
             total_achievements: { type: Number, default: 0 },
-            unlocked_achievements: [{ type: String }],
+            achievements: [{ 
+                name: String,
+                description: String, // Changed to match GraphQL
+                icon: String,
+                completion_percentage: Number // Added to match GraphQL
+            }],
         },
     ],
 
@@ -48,6 +57,8 @@ const UserSchema = new mongoose.Schema({
             appid: { type: Number, required: true },
         },
     ],
+
+    lastSyncedAt: { type: Date },
 });
 
 export default mongoose.model("User", UserSchema);
