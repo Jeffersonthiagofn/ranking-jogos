@@ -1,16 +1,18 @@
-import { useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 
-import AuthLayout from "../components/AuthLayout";
+import AuthLayout from "../layouts/AuthLayout";
 import TextField from "../components/TextField";
 import GradientButton from "../components/GradientButton";
 import { AuthContext } from "../context/AuthContext";
+import { loginWithSteam } from "../services/authService";
 
-import heroImg from "../assets/login-hero.png"; // ajuste extensão
+import heroImg from "../assets/login-hero.png";
 
 export default function Login() {
     const { login } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
@@ -18,6 +20,10 @@ export default function Login() {
 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (user) navigate("/");
+    }, [user]);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -36,7 +42,7 @@ export default function Login() {
         try {
             setLoading(true);
             await login(email, password);
-            navigate("/dashboard");
+            navigate("/");
         } catch (err) {
             setError(err.message || "Não foi possível fazer login.");
         } finally {
@@ -98,6 +104,7 @@ export default function Login() {
                 </div>
 
                 <button
+                    onClick={loginWithSteam}
                     type="button"
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1b2838] py-3 text-sm font-medium text-white ring-1 ring-white/10 hover:bg-[#223247]"
                 >

@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User } from "lucide-react";
 
-import AuthLayout from "../components/AuthLayout";
+import AuthLayout from "../layouts/AuthLayout";
 import TextField from "../components/TextField";
 import GradientButton from "../components/GradientButton";
 import { registerUser } from "../services/authService";
-
-import heroImg from "../assets/login-hero.png"; // mesma imagem do login
+import heroImg from "../assets/login-hero.png";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Register() {
     const navigate = useNavigate();
+    const { login } = useContext(AuthContext);
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -36,6 +37,7 @@ export default function Register() {
             setLoading(true);
             const message = await registerUser(name, email, password);
             setSuccessMessage(message || "Cadastro realizado com sucesso.");
+            await login(email, password);
 
             setTimeout(() => {
                 navigate("/");
@@ -110,7 +112,7 @@ export default function Register() {
                     Já tem uma conta?{" "}
                     <button
                         type="button"
-                        onClick={() => navigate("/")}
+                        onClick={() => navigate("/login")}
                         className="font-medium text-violet-300 hover:text-violet-200"
                     >
                         Entrar

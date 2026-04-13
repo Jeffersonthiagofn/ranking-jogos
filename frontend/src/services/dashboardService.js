@@ -32,13 +32,16 @@ export async function getDashboardGames(limit = 5) {
         appid: game.appid,
         name: game.name,
         image: game.thumb,
+        thumb: game.thumb,
         developer: game.developer || "Desenvolvedor desconhecido",
         genres: game.genres || [],
         currentPlayers: game.current_players || 0,
         price: game.price ?? null,
         popularityScore: game.popularityScore ?? 0,
+        ranking_data: game.ranking_data,
         score: game.ranking_data?.score ?? 0,
         positiveVotes: game.ranking_data?.positive_votes ?? 0,
+        achievements: game.achievements,
         achievementsCount: game.achievements?.length || 0,
     }));
 

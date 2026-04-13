@@ -5,34 +5,24 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Ranking from "../pages/Ranking";
 import Compare from "../pages/Compare";
+import GameDetails from "../pages/GameDetails";
+import Profile from "../pages/Profile";
 
 export function AppRoutes() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Login />} />
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/ranking" element={<Ranking />} />
+                <Route path="/compare" element={<Compare />} />
+                <Route path="/game/:appid" element={<GameDetails />} />
                 <Route
-                    path="/dashboard"
+                    path="/profile"
                     element={
                         <PrivateRoute>
-                            <Dashboard />
-                        </PrivateRoute>
-                    }
-                />
-                <Route
-                    path="/ranking"
-                    element={
-                        <PrivateRoute>
-                            <Ranking />
-                        </PrivateRoute>
-                    }
-                />
-                <Route
-                    path="/comparacao"
-                    element={
-                        <PrivateRoute>
-                            <Compare />
+                            <Profile />
                         </PrivateRoute>
                     }
                 />
