@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { ChevronRight, Sparkles, Users, BarChart3 } from "lucide-react";
 import AppLayout from "../layouts/AppLayout";
@@ -65,7 +65,6 @@ export default function Dashboard() {
     }
 
     const comparisonGames = getRandomGames(mostPopularGames.slice(0, 5));
-    console.log(comparisonGames[0]);
 
     return (
         <AppLayout>
@@ -151,7 +150,12 @@ export default function Dashboard() {
                                     Em alta agora
                                 </div>
 
-                                <button className="text-xs text-violet-300 hover:text-violet-200">
+                                <button
+                                    onClick={() => {
+                                        navigate("/ranking");
+                                    }}
+                                    className="text-xs text-violet-300 hover:text-violet-200"
+                                >
                                     Ver tudo
                                 </button>
                             </div>

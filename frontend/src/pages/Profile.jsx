@@ -116,6 +116,24 @@ export default function Profile() {
 
     const remainingCountTopGames = topGames.length - (cardsPerRow - 1);
 
+    const userMocked = {
+        steamLevel: 100,
+        steamXp: 10600,
+        steamXpNeeded: 10000,
+    };
+    const percentBar = (
+        (userMocked.steamXp * 100) /
+        (userMocked.steamXp + userMocked.steamXpNeeded)
+    ).toFixed(1);
+
+    function categoryLevel() {
+        if (!userMocked || userMocked.steamLevel == 1) return "Iniciante";
+        if (userMocked.steamLevel <= 10) return "Aprendiz";
+        if (userMocked.steamLevel <= 20) return "Veterano";
+        if (userMocked.steamLevel <= 30) return "Mestre";
+        if (userMocked.steamLevel > 30) return "Lendário";
+    }
+
     return (
         <AppLayout>
             <div className="text-white">
@@ -143,7 +161,9 @@ export default function Profile() {
 
                             <h1 className="text-2xl font-semibold">{user.name}</h1>
 
-                            <p className="text-sm text-white/60">Iniciante • Nível 1</p>
+                            <p className="text-sm text-white/60">
+                                {categoryLevel()} • Nível {userMocked.steamLevel}
+                            </p>
 
                             <div className="mt-2 flex items-center gap-2">
                                 <button className="rounded-full bg-violet-500 px-4 py-1.5 text-xs font-medium text-white hover:opacity-90">
@@ -203,13 +223,20 @@ export default function Profile() {
                             </div>
 
                             <div className="rounded-2xl bg-gradient-to-r from-violet-500/20 to-indigo-500/20 p-4 ring-1 ring-violet-400/20">
-                                <p className="text-sm text-white/70">Nível 1</p>
+                                <p className="text-sm text-white/70">
+                                    Nível {userMocked.steamLevel}
+                                </p>
 
                                 <div className="mt-3 h-2 w-full rounded-full bg-white/10">
-                                    <div className="h-2 w-[10%] rounded-full bg-violet-400" />
+                                    <div
+                                        className={`h-2 w-[${percentBar}%] rounded-full bg-violet-400`}
+                                    />
                                 </div>
 
-                                <p className="mt-2 text-xs text-white/50">100 / 1,000 XP</p>
+                                <p className="mt-2 text-xs text-white/50">
+                                    {userMocked.steamXp} /{" "}
+                                    {userMocked.steamXp + userMocked.steamXpNeeded} XP
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -287,9 +314,20 @@ export default function Profile() {
                 </div>
 
                 {/* Grid */}
+                {visibleFavorites.length == 0 ? (
+                    <h2 className="w-[21rem] flex justify-center  rounded-xl text-sm font-semibold text-white/50 bg-white/[0.03] p-3 ring-1 ring-white/10">
+                        Lista Vazia. Adicione jogos ao seus favoritos
+                    </h2>
+                ) : (
+                    <></>
+                )}
                 <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                     {visibleFavorites.map((fav) => (
-                        <FavoriteCard appid={fav.appid} game={fav.gameDetails} />
+                        <FavoriteCard
+                            appid={fav.appid}
+                            game={fav.gameDetails}
+                            setFavorites={setFavorites}
+                        />
                     ))}
 
                     {!showAllFavoriteGames && hasRemaining && (
