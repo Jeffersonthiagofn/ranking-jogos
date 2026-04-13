@@ -43,17 +43,22 @@ const UserSchema = new mongoose.Schema({
             playtime_forever: { type: Number, default: 0 },
             completed_achievements: { type: Number, default: 0 },
             total_achievements: { type: Number, default: 0 },
-            unlocked_achievements: [{ type: String }],
+            achievements: [{ 
+                name: String,
+                description: String, // Changed to match GraphQL
+                icon: String,
+                completion_percentage: Number // Added to match GraphQL
+            }],
         },
     ],
-
-
 
     favorites: [
         {
             appid: { type: Number, required: true },
         },
     ],
+
+    lastSyncedAt: { type: Date },
 });
 
 export default mongoose.model("User", UserSchema);

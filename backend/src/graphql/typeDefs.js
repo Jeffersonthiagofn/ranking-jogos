@@ -40,7 +40,7 @@ type OwnedGame {
   playtime_forever: Int
   completed_achievements: Int
   total_achievements: Int
-  unlocked_achievements: [String]
+  achievements: [Achievement]
   gameDetails: Game 
 }
 
@@ -91,7 +91,7 @@ type AuthPayload {
 type Mutation {
   register(name: String!, email: String!, password: String!): String
   login(email: String!, password: String!): AuthPayload
-  syncMyLibrary: String!
+  syncMyLibrary: [OwnedGame]
   toggleFavorite(appid: Int!): [Favorite]
 }
 `;

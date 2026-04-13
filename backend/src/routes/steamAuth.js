@@ -11,7 +11,7 @@ const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
 const fetchAndFormatSteamGames = async (steamId) => {
     try {
-        const gamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&format=json&language=${process.env.STEAM_LANG}`;
+        const gamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&format=json&language=${process.env.STEAM_LANG}&include_played_free_games=1&include_appinfo=1`;
         const gamesRes = await fetch(gamesUrl);
         const gamesData = await gamesRes.json();
 
@@ -51,22 +51,92 @@ const fetchSteamLevelData = async (steamId) => {
     }
 };
 
-const syncSteamDataToUser = async (user, steamId) => {
-    const [fetchedGames, levelData] = await Promise.all([
-        fetchAndFormatSteamGames(steamId),
-        fetchSteamLevelData(steamId)
-    ]);
+const checkSyncCooldown = (user, forceSync) => {
+    const COOLDOWN_MS = 60 * 60 * 1000;
+    
+    if (!forceSync && user.lastSyncedAt && (Date.now() - user.lastSyncedAt.getTime() < COOLDOWN_MS)) {
+        return true;
+    }
+    return false;
+};
 
-    if (fetchedGames && fetchedGames.length > 0) {
-        user.ownedGames = fetchedGames;
+const fetchOwnedGames = async (steamId) => {
+    const gamesUrl = `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&format=json&language=${process.env.STEAM_LANG || 'english'}&include_played_free_games=1&include_appinfo=1`;
+    const gamesRes = await fetch(gamesUrl);
+    const gamesData = await gamesRes.json();
+
+    if (!gamesData.response || !gamesData.response.games) {
+        throw new Error("Could not fetch games from Steam.");
     }
 
-    if (levelData) {
-        user.steamLevel = levelData.level;
-        user.steamXp = levelData.xp;
-        user.steamXpNeeded = levelData.xpNeeded;
+    return gamesData.response.games.map((game) => ({
+        appid: game.appid,
+        playtime_forever: game.playtime_forever,
+        completed_achievements: 0,
+        total_achievements: 0,
+        achievements: [],
+    }));
+};
+
+const fetchGameAchievements = async (ownedGames, steamId) => {
+    const chunkSize = 50;
+    
+    for (let i = 0; i < ownedGames.length; i += chunkSize) {
+        const chunk = ownedGames.slice(i, i + chunkSize);
+        let achUrl = `https://api.steampowered.com/IPlayerService/GetTopAchievementsForGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&max_achievements=10000&language=${process.env.STEAM_LANG || 'english'}`;
+        
+        chunk.forEach((game, index) => {
+            achUrl += `&appids%5B${index}%5D=${game.appid}`;
+        });
+
+        const achRes = await fetch(achUrl);
+        const achData = await achRes.json();
+
+        if (achData.response && achData.response.games) {
+            achData.response.games.forEach((achGame) => {
+                const targetGame = ownedGames.find((g) => Number(g.appid) === Number(achGame.appid));
+
+                if (targetGame) {
+                    targetGame.total_achievements = achGame.total_achievements || 0;
+
+                    if (achGame.achievements) {
+                        targetGame.completed_achievements = achGame.achievements.length;
+                        targetGame.achievements = achGame.achievements.map((ach) => ({
+                            name: ach.name || "Unknown",
+                            description: ach.desc || "",
+                            icon: ach.icon ? `https://cdn.akamai.steamstatic.com/steamcommunity/public/images/apps/${targetGame.appid}/${ach.icon}` : "",
+                            completion_percentage: parseFloat(ach.player_percent_unlocked) || 0
+                        }));
+                    }
+                }
+            });
+        }
     }
     
+    return ownedGames;
+};
+
+export const syncSteamDataToUser = async (user, steamId, forceSync = false) => {
+    try {
+        if (checkSyncCooldown(user, forceSync)) {
+            console.log(`Skipping sync for ${user.name}. Last synced less than an hour ago.`);
+            return; 
+        }
+
+        console.log(`--- Starting Steam Sync for ${user.name} ---`);
+
+        let ownedGames = await fetchOwnedGames(steamId);
+
+        ownedGames = await fetchGameAchievements(ownedGames, steamId);
+
+        user.ownedGames = ownedGames;
+        user.lastSyncedAt = new Date();
+        user.markModified("ownedGames");
+
+        console.log(`--- Sync Complete for ${user.name} ---`);
+    } catch (error) {
+        console.error("Error during Steam sync:", error.message);
+    }
 };
 
 const handleDirectLogin = async (steamId, profile, avatarUrl) => {
