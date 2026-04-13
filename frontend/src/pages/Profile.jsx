@@ -116,22 +116,14 @@ export default function Profile() {
 
     const remainingCountTopGames = topGames.length - (cardsPerRow - 1);
 
-    const userMocked = {
-        steamLevel: 100,
-        steamXp: 10600,
-        steamXpNeeded: 10000,
-    };
-    const percentBar = (
-        (userMocked.steamXp * 100) /
-        (userMocked.steamXp + userMocked.steamXpNeeded)
-    ).toFixed(1);
+    const percentBar = ((user.steamXp * 100) / (user.steamXp + user.steamXpNeeded)).toFixed(1);
 
     function categoryLevel() {
-        if (!userMocked || userMocked.steamLevel == 1) return "Iniciante";
-        if (userMocked.steamLevel <= 10) return "Aprendiz";
-        if (userMocked.steamLevel <= 20) return "Veterano";
-        if (userMocked.steamLevel <= 30) return "Mestre";
-        if (userMocked.steamLevel > 30) return "Lendário";
+        if (!user || user.steamLevel == 1) return "Iniciante";
+        if (user.steamLevel <= 10) return "Aprendiz";
+        if (user.steamLevel <= 20) return "Veterano";
+        if (user.steamLevel <= 30) return "Mestre";
+        if (user.steamLevel > 30) return "Lendário";
     }
 
     return (
@@ -162,7 +154,7 @@ export default function Profile() {
                             <h1 className="text-2xl font-semibold">{user.name}</h1>
 
                             <p className="text-sm text-white/60">
-                                {categoryLevel()} • Nível {userMocked.steamLevel}
+                                {categoryLevel()} • Nível {user.steamLevel}
                             </p>
 
                             <div className="mt-2 flex items-center gap-2">
@@ -223,9 +215,7 @@ export default function Profile() {
                             </div>
 
                             <div className="rounded-2xl bg-gradient-to-r from-violet-500/20 to-indigo-500/20 p-4 ring-1 ring-violet-400/20">
-                                <p className="text-sm text-white/70">
-                                    Nível {userMocked.steamLevel}
-                                </p>
+                                <p className="text-sm text-white/70">Nível {user.steamLevel}</p>
 
                                 <div className="mt-3 h-2 w-full rounded-full bg-white/10">
                                     <div
@@ -234,8 +224,7 @@ export default function Profile() {
                                 </div>
 
                                 <p className="mt-2 text-xs text-white/50">
-                                    {userMocked.steamXp} /{" "}
-                                    {userMocked.steamXp + userMocked.steamXpNeeded} XP
+                                    {user.steamXp} / {user.steamXp + user.steamXpNeeded} XP
                                 </p>
                             </div>
                         </div>

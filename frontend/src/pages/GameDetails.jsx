@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getGameDetails } from "../services/gameDetailsService";
 import { CodeXml, Calendar, Heart, Star } from "lucide-react";
-import { scoreToStars } from "../utils/dataChanges";
+import { formatDate, scoreToStars } from "../utils/dataChanges";
 import Achievements from "../components/game/Achievements";
 
 export default function GameDetails() {
@@ -95,7 +95,7 @@ export default function GameDetails() {
                             </div>
                             <div className="flex items-center gap-2 text-sm text-white/80">
                                 <Calendar className={`h-4 w-4 transition-colors "text-white/75"`} />
-                                <span>Lançamento: {game.release_date}</span>
+                                <span>Lançamento: {formatDate(game.release_date)}</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm text-white/80">
                                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />

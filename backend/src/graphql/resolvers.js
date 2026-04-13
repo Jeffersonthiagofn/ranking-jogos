@@ -196,10 +196,61 @@ export const resolvers = {
                             },
                         ],
                     },
+                    numericPrice: {
+                        $cond: [
+                            {
+                                $or: [
+                                    { $eq: ["$price", "Free to Play"] },
+                                    { $eq: ["$price", "N/A"] },
+                                    { $eq: ["$price", null] },
+                                    { $eq: ["$price", ""] },
+                                ],
+                            },
+                            null,
+                            {
+                                $convert: {
+                                    input: {
+                                        $replaceAll: {
+                                            input: {
+                                                $replaceAll: {
+                                                    input: {
+                                                        $replaceAll: {
+                                                            input: "$price",
+                                                            find: "R$ ",
+                                                            replacement: "",
+                                                        },
+                                                    },
+                                                    find: ".",
+                                                    replacement: "",
+                                                },
+                                            },
+                                            find: ",",
+                                            replacement: ".",
+                                        },
+                                    },
+                                    to: "double",
+                                    onError: null,
+                                    onNull: null,
+                                },
+                            },
+                        ],
+                    },
                     parsedDate: {
                         $dateFromString: {
-                            dateString: "$release_date",
-                            format: "%d %b, %Y",
+                            dateString: {
+                                $replaceAll: {
+                                    input: {
+                                        $replaceAll: {
+                                            input: "$release_date",
+                                            find: ".",
+                                            replacement: "",
+                                        },
+                                    },
+                                    find: "/",
+                                    replacement: " ",
+                                },
+                            },
+                            format: "%d %b %Y",
                             onError: null,
                         },
                     },
@@ -298,12 +349,12 @@ export const resolvers = {
 
             // Call the shared function, and pass true to BYPASS the cooldown!
             await syncSteamDataToUser(user, user.steamId, true);
-            
+
             await user.save(); // Save the mutations to the database
 
             return user.ownedGames;
         },
-        
+
         toggleFavorite: async (_, { appid }, context) => {
             if (!context.user) throw new Error("Unauthorized");
 

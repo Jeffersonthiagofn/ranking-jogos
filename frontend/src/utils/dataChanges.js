@@ -12,3 +12,7 @@ export function formatCompactNumber(value) {
 export function scoreToStars(score = 0) {
     return (score / 20).toFixed(1);
 }
+
+export function formatDate(value) {
+    return value.replace("/", " ").replace("/", " ").replace(".", " ");
+}

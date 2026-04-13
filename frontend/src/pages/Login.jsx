@@ -11,8 +11,8 @@ import { loginWithSteam } from "../services/authService";
 import heroImg from "../assets/login-hero.png";
 
 export default function Login() {
-    const { login } = useContext(AuthContext);
-    const { user } = useContext(AuthContext);
+    const { login, user, fetchMe } = useContext(AuthContext);
+
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
@@ -20,6 +20,10 @@ export default function Login() {
 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        fetchMe();
+    }, []);
 
     useEffect(() => {
         if (user) navigate("/");

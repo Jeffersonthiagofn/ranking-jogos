@@ -30,8 +30,8 @@ function ComparisonMetrics({ leftGame, rightGame }) {
         },
     ];
 
-    let leftValue = 0;
-    let rightValue = 0;
+    let leftValue = "";
+    let rightValue = "";
 
     return (
         <div className="bg-[#0f172a] rounded-2xl p-6 space-y-6">
@@ -83,11 +83,13 @@ function ComparisonMetrics({ leftGame, rightGame }) {
                     <div key={metric.key} className="space-y-2">
                         <div className="flex justify-between text-sm text-white">
                             <span className="flex justify-start items-center w-32">
-                                {leftValue == "Gratuito"
+                                {leftValue == ""
                                     ? leftValue
-                                    : metric.key == "price"
-                                      ? `R$ ${formatCompactNumber(leftValue)}`
-                                      : formatCompactNumber(leftValue)}
+                                    : leftValue == "Gratuito"
+                                      ? leftValue
+                                      : metric.key == "price"
+                                        ? `R$ ${formatCompactNumber(leftValue)}`
+                                        : formatCompactNumber(leftValue)}
                             </span>
                             <div className="flex flex-col items-center gap-2">
                                 {metric.key == "players" ? <Users className={"h-4"} /> : <></>}
@@ -101,11 +103,13 @@ function ComparisonMetrics({ leftGame, rightGame }) {
                                 <span className="text-white/50">{metric.label}</span>
                             </div>
                             <span className="flex justify-end items-center w-32">
-                                {rightValue == "Gratuito"
+                                {rightValue == ""
                                     ? rightValue
-                                    : metric.key == "price"
-                                      ? `R$ ${formatCompactNumber(rightValue)}`
-                                      : formatCompactNumber(rightValue)}
+                                    : rightValue == "Gratuito"
+                                      ? rightValue
+                                      : metric.key == "price"
+                                        ? `R$ ${formatCompactNumber(rightValue)}`
+                                        : formatCompactNumber(rightValue)}
                             </span>
                         </div>
 

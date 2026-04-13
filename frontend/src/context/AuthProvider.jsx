@@ -16,12 +16,14 @@ export function AuthProvider({ children }) {
                         name
                         avatar
                         steamId
+                        steamLevel
+                        steamXp
+                        steamXpNeeded
                         ownedGames {
                             appid
                             playtime_forever
                             completed_achievements
                             total_achievements
-                            unlocked_achievements 
                         }
                         favorites {
                             appid
@@ -29,7 +31,6 @@ export function AuthProvider({ children }) {
                     }
                 }
             `;
-
             const data = await graphqlRequest(query);
             setUser(data.getMe);
         } catch (err) {
@@ -65,7 +66,7 @@ export function AuthProvider({ children }) {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, fetchMe }}>
             {children}
         </AuthContext.Provider>
     );

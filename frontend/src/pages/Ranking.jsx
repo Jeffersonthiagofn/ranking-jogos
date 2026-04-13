@@ -5,6 +5,7 @@ import { ChevronDown, Heart, X } from "lucide-react";
 import AppLayout from "../layouts/AppLayout";
 import Modal from "../components/Modal";
 import { AuthContext } from "../context/AuthContext";
+import { formatDate } from "../utils/dataChanges";
 
 const sortMap = {
     "Mais populares": "popular",
@@ -232,7 +233,9 @@ export default function Ranking() {
                                     <span className="text-white">{game.name}</span>
                                 </div>
 
-                                <span className="text-white/60 text-sm">{game.release_date}</span>
+                                <span className="text-white/60 text-sm">
+                                    {formatDate(game.release_date)}
+                                </span>
                                 <span className="text-white text-sm">{game.price}</span>
 
                                 <button
