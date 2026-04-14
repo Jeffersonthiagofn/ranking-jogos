@@ -5,6 +5,7 @@ import { ChevronDown, Heart, X } from "lucide-react";
 import AppLayout from "../layouts/AppLayout";
 import Modal from "../components/Modal";
 import { AuthContext } from "../context/AuthContext";
+import { formatDate } from "../utils/dataChanges";
 
 const sortMap = {
     "Mais populares": "popular",
@@ -118,12 +119,10 @@ export default function Ranking() {
         <AppLayout>
             <div className="p-6">
                 <div className="rounded-2xl bg-gradient-to-b from-[#0b0f1a] to-[#070a12] p-6 shadow-xl">
-                    {/* HEADER */}
                     <div className="flex items-center justify-between mb-6">
                         <h1 className="text-xl font-semibold text-white">Jogo</h1>
 
                         <div className="flex gap-3">
-                            {/* GENRES DROPDOWN */}
                             <div ref={genreRef} className="relative">
                                 <button
                                     onClick={() => {
@@ -132,11 +131,10 @@ export default function Ranking() {
                                     }}
                                     className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm text-white ${selectedGenre !== "Gêneros" ? "bg-violet-500/20 hover:bg-[rgb(59,47,112)]" : "bg-[#1a1f2e] hover:bg-[#22283a]"}`}
                                 >
-                                    {/* Se tiver filtro ativo, mostra X */}
                                     {selectedGenre !== "Gêneros" && (
                                         <span
                                             onClick={(e) => {
-                                                e.stopPropagation(); // 🔥 impede abrir dropdown
+                                                e.stopPropagation();
                                                 setSelectedGenre("Gêneros");
                                                 setPage(1);
                                             }}
@@ -169,7 +167,6 @@ export default function Ranking() {
                                 )}
                             </div>
 
-                            {/* SORT DROPDOWN */}
                             <div ref={sortRef} className="relative">
                                 <button
                                     onClick={() => {
@@ -202,7 +199,6 @@ export default function Ranking() {
                         </div>
                     </div>
 
-                    {/* TABLE HEADER */}
                     <div className="grid grid-cols-[60px_1fr_200px_120px_60px] text-xs text-white/40 px-2 pb-3 border-b border-white/10">
                         <span>#Top</span>
                         <span>Jogo</span>
@@ -211,7 +207,6 @@ export default function Ranking() {
                         <span></span>
                     </div>
 
-                    {/* LIST */}
                     <div className="divide-y divide-white/5">
                         {games.map((game, index) => (
                             <div
@@ -232,7 +227,9 @@ export default function Ranking() {
                                     <span className="text-white">{game.name}</span>
                                 </div>
 
-                                <span className="text-white/60 text-sm">{game.release_date}</span>
+                                <span className="text-white/60 text-sm">
+                                    {formatDate(game.release_date)}
+                                </span>
                                 <span className="text-white text-sm">{game.price}</span>
 
                                 <button
@@ -259,7 +256,6 @@ export default function Ranking() {
                         ))}
                     </div>
 
-                    {/* PAGINATION */}
                     <div className="flex items-center justify-between mt-6 text-sm text-white/60">
                         <div className="flex items-center gap-2">
                             {pages.map((p) => (

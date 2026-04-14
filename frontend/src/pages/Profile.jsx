@@ -1,7 +1,7 @@
 import AppLayout from "../layouts/AppLayout";
-import backgroundImg from "../assets/background-profile.png";
-import profileImg from "../assets/image-profile.avif";
-import { useEffect, useContext, useState } from "react";
+import { backgrounds } from "../utils/imagesBg";
+import profileImg from "../assets/img-profile/image-profile.avif";
+import { useEffect, useContext, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { Settings } from "lucide-react";
@@ -29,8 +29,30 @@ export default function Profile() {
     const [favorites, setFavorites] = useState([]);
     const [topGames, setTopGames] = useState([]);
     const [loadingFavorites, setLoadingFavorites] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
+    const [currentBg, setCurrentBg] = useState(backgrounds[0]);
+    const [selectedBg, setSelectedBg] = useState(backgrounds[0]);
+
+    const dropdownRef = useRef(null);
+    const menuRef = useRef(null);
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setIsOpen(false);
+                setSelectedBg(currentBg);
+            }
+
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                setIsMenuOpen(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [currentBg]);
 
     const playedGamesCount = user.ownedGames.reduce(
         (acc, game) => (game.playtime_forever > 0 ? acc + 1 : acc),
@@ -55,6 +77,7 @@ export default function Profile() {
 
     function toggleMenu() {
         setIsMenuOpen((prev) => !prev);
+        setIsOpen(false);
     }
 
     async function handleLogout() {
@@ -116,14 +139,24 @@ export default function Profile() {
 
     const remainingCountTopGames = topGames.length - (cardsPerRow - 1);
 
+    const percentBar = ((user.steamXp * 100) / (user.steamXp + user.steamXpNeeded)).toFixed(1);
+
+    function categoryLevel() {
+        if (!user || user.steamLevel == 1) return "Iniciante";
+        if (user.steamLevel <= 10) return "Aprendiz";
+        if (user.steamLevel <= 20) return "Veterano";
+        if (user.steamLevel <= 30) return "Mestre";
+        if (user.steamLevel > 30) return "Lendário";
+    }
+
     return (
         <AppLayout>
             <div className="text-white">
                 <div className="rounded-2xl relative h-[220px] w-full overflow-hidden rounded-b-3xl">
                     <img
-                        src={backgroundImg}
+                        src={currentBg.image}
                         alt="background"
-                        className="absolute inset-0 h-full w-full object-fill opacity-70"
+                        className="absolute inset-0 h-full w-full object-cover opacity-70"
                     />
 
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B10] via-[#0B0B10]/40 to-transparent" />
@@ -143,14 +176,19 @@ export default function Profile() {
 
                             <h1 className="text-2xl font-semibold">{user.name}</h1>
 
-                            <p className="text-sm text-white/60">Iniciante • Nível 1</p>
+                            <p className="text-sm text-white/60">
+                                {categoryLevel()} • Nível {user.steamLevel}
+                            </p>
 
                             <div className="mt-2 flex items-center gap-2">
-                                <button className="rounded-full bg-violet-500 px-4 py-1.5 text-xs font-medium text-white hover:opacity-90">
+                                <button
+                                    onClick={() => setIsOpen((prev) => !prev)}
+                                    className="rounded-full bg-violet-500 px-4 py-1.5 text-xs font-medium text-white hover:opacity-90"
+                                >
                                     Editar perfil
                                 </button>
 
-                                <div className="relative flex items-center gap-2">
+                                <div ref={menuRef} className="relative flex items-center gap-2">
                                     <button
                                         onClick={toggleMenu}
                                         className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center"
@@ -174,6 +212,58 @@ export default function Profile() {
                 </div>
 
                 <div className="relative">
+                    {isOpen && (
+                        <div
+                            ref={dropdownRef}
+                            className="absolute -bottom-[4.1rem] mt-3 w-2/3 rounded-2xl bg-[#0B0B10] p-4 ring-1 ring-white/10 shadow-xl z-50"
+                        >
+                            <p className="text-sm text-white mb-4">Escolha seu plano de fundo</p>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                {backgrounds.map((bg) => (
+                                    <div
+                                        key={bg.name}
+                                        onClick={() => setSelectedBg(bg)}
+                                        className={`cursor-pointer rounded-lg overflow-hidden ring-2 transition ${
+                                            selectedBg.name === bg.name
+                                                ? "ring-violet-500"
+                                                : "ring-transparent hover:ring-white/20"
+                                        }`}
+                                    >
+                                        <img src={bg.image} className="w-full h-14 object-cover" />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* BOTÕES */}
+                            <div className="flex justify-end gap-3 mt-5">
+                                <button
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        setSelectedBg(currentBg);
+                                    }}
+                                    className="rounded-lg bg-white/5 py-2 px-3 text-white hover:bg-white/10"
+                                >
+                                    Cancelar
+                                </button>
+
+                                <button
+                                    disabled={selectedBg.name === currentBg.name}
+                                    onClick={() => {
+                                        setCurrentBg(selectedBg);
+                                        setIsOpen(false);
+                                    }}
+                                    className={`rounded-lg py-2 px-3 text-white ${
+                                        selectedBg.name === currentBg.name
+                                            ? "bg-white/10 cursor-not-allowed"
+                                            : "bg-violet-500 hover:bg-violet-600"
+                                    }`}
+                                >
+                                    Confirmar
+                                </button>
+                            </div>
+                        </div>
+                    )}
                     <div
                         className={`${
                             user?.steamId
@@ -203,13 +293,18 @@ export default function Profile() {
                             </div>
 
                             <div className="rounded-2xl bg-gradient-to-r from-violet-500/20 to-indigo-500/20 p-4 ring-1 ring-violet-400/20">
-                                <p className="text-sm text-white/70">Nível 1</p>
+                                <p className="text-sm text-white/70">Nível {user.steamLevel}</p>
 
                                 <div className="mt-3 h-2 w-full rounded-full bg-white/10">
-                                    <div className="h-2 w-[10%] rounded-full bg-violet-400" />
+                                    <div
+                                        className="h-2 rounded-full bg-violet-400"
+                                        style={{ width: `${percentBar}%` }}
+                                    />
                                 </div>
 
-                                <p className="mt-2 text-xs text-white/50">100 / 1,000 XP</p>
+                                <p className="mt-2 text-xs text-white/50">
+                                    {user.steamXp} / {user.steamXp + user.steamXpNeeded} XP
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -229,7 +324,6 @@ export default function Profile() {
             {user.steamId ? (
                 <>
                     <div className="mt-10">
-                        {/* Header */}
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <div className="h-5 w-1 rounded bg-violet-500" />
@@ -248,7 +342,6 @@ export default function Profile() {
                             )}
                         </div>
 
-                        {/* Grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                             {visibleTopGames.map((fav) => (
                                 <TopGamesCard game={fav} />
@@ -269,7 +362,6 @@ export default function Profile() {
                 <></>
             )}
             <div className="mt-10">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                         <div className="h-5 w-1 rounded bg-violet-500" />
@@ -286,10 +378,20 @@ export default function Profile() {
                     )}
                 </div>
 
-                {/* Grid */}
+                {visibleFavorites.length == 0 ? (
+                    <h2 className="w-[21rem] flex justify-center  rounded-xl text-sm font-semibold text-white/50 bg-white/[0.03] p-3 ring-1 ring-white/10">
+                        Lista Vazia. Adicione jogos ao seus favoritos
+                    </h2>
+                ) : (
+                    <></>
+                )}
                 <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                     {visibleFavorites.map((fav) => (
-                        <FavoriteCard appid={fav.appid} game={fav.gameDetails} />
+                        <FavoriteCard
+                            appid={fav.appid}
+                            game={fav.gameDetails}
+                            setFavorites={setFavorites}
+                        />
                     ))}
 
                     {!showAllFavoriteGames && hasRemaining && (

@@ -6,12 +6,16 @@ export async function getMe() {
             getMe {
             id
             name
+            steamId
+            steamLevel
+            steamXp
+            steamXpNeeded
             ownedGames {
                     appid
                     playtime_forever
                     completed_achievements
                     total_achievements
-                    unlocked_achievements
+                    achievements
                 }
             }
         }
