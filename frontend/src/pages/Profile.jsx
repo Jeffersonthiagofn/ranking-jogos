@@ -215,7 +215,7 @@ export default function Profile() {
                     {isOpen && (
                         <div
                             ref={dropdownRef}
-                            className="absolute -bottom-[4.1rem] mt-3 w-2/3 rounded-2xl bg-[#0B0B10] p-4 ring-1 ring-white/10 shadow-xl z-50"
+                            className="absolute -bottom-[3.4rem] mt-3 w-2/3 rounded-2xl bg-[#0B0B10] p-4 ring-1 ring-white/10 shadow-xl z-50"
                         >
                             <p className="text-sm text-white mb-4">Escolha seu plano de fundo</p>
 
