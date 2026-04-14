@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 import { useState, useEffect, useRef, useContext } from "react";
 import { searchGames } from "../services/searchService";
 import { AuthContext } from "../context/AuthContext";
-import profileImg from "../assets/image-profile.avif";
+import profileImg from "../assets/img-profile/image-profile.avif";
 
 function NavItem({ to, children }) {
     return (
