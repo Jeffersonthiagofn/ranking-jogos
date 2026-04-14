@@ -40,7 +40,7 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    <div>
+                    <div className="mt-2">
                         <h4 className="text-sm font-semibold text-white/85">Plataforma</h4>
                         <ul className="mt-4 space-y-2 text-sm text-white/55">
                             <li className="cursor-pointer hover:text-white/80">Rankings globais</li>
@@ -50,7 +50,7 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    <div>
+                    <div className="mt-2">
                         <h4 className="text-sm font-semibold text-white/85">Recursos</h4>
                         <ul className="mt-4 space-y-2 text-sm text-white/55">
                             <li className="cursor-pointer hover:text-white/80">Documentação</li>
@@ -64,7 +64,7 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    <div>
+                    <div className="mt-2">
                         <h4 className="text-sm font-semibold text-white/85">Empresa</h4>
                         <ul className="mt-4 space-y-2 text-sm text-white/55">
                             <li className="cursor-pointer hover:text-white/80">Sobre nós</li>

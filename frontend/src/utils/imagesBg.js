@@ -6,10 +6,10 @@ import orientBg from "../assets/bg-profile/orient-bg.jpg";
 import starryBg from "../assets/bg-profile/starry-bg.jpg";
 
 export const backgrounds = [
-    { name: "default", image: defaultBg },
-    { name: "castle", image: castleBg },
-    { name: "chopper", image: chopperBg },
-    { name: "dragons", image: dragonsBg },
-    { name: "orient", image: orientBg },
-    { name: "starry", image: starryBg },
+    { id: 0, name: "default", image: defaultBg },
+    { id: 1, name: "castle", image: castleBg },
+    { id: 2, name: "chopper", image: chopperBg },
+    { id: 3, name: "dragons", image: dragonsBg },
+    { id: 4, name: "orient", image: orientBg },
+    { id: 5, name: "starry", image: starryBg },
 ];

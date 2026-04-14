@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { searchGames } from "../../services/searchService";
 import { fetchGameById } from "../../services/gameService";
 
-export default function CompareCard({ game, onSelect }) {
+export default function CompareCard({ game, secondGame, onSelect }) {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -121,7 +121,11 @@ export default function CompareCard({ game, onSelect }) {
                                                 console.error(err);
                                             }
                                         }}
-                                        className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-white/5"
+                                        className={`flex cursor-pointer items-center gap-3 px-2 py-2 rounded-lg ${
+                                            secondGame?.appid === g.appid
+                                                ? "opacity-40 pointer-events-none"
+                                                : "hover:bg-white/5"
+                                        }`}
                                     >
                                         <img
                                             src={g.icon}

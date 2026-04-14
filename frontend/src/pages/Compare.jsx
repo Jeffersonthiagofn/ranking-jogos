@@ -146,9 +146,9 @@ export default function Compare() {
     return (
         <AppLayout>
             <div className="py-6 grid grid-cols-2 gap-6">
-                <CompareCard game={leftGame} onSelect={setLeftGame} />
+                <CompareCard game={leftGame} secondGame={rightGame} onSelect={setLeftGame} />
 
-                <CompareCard game={rightGame} onSelect={setRightGame} />
+                <CompareCard game={rightGame} secondGame={leftGame} onSelect={setRightGame} />
             </div>
             <ComparisonMetrics leftGame={leftGame} rightGame={rightGame} />
         </AppLayout>

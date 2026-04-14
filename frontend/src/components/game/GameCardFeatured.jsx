@@ -68,7 +68,7 @@ export default function GameCardFeatured({
                 <div className="absolute inset-x-0 bottom-0 p-5">
                     <div className="flex items-center gap-2 text-xs text-white/60">
                         <p className="inline-flex items-center gap-2 rounded-full bg-violet-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-                            RANK #{rank}
+                            TOP #{rank}
                         </p>
                     </div>
 
@@ -101,6 +101,11 @@ export default function GameCardFeatured({
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        navigate("/compare", {
+                                            state: {
+                                                leftGame: game,
+                                            },
+                                        });
                                     }}
                                     className="rounded-2xl bg-violet-500 px-5 py-3 text-sm font-medium text-white"
                                 >

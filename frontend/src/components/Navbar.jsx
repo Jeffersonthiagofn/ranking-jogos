@@ -42,17 +42,28 @@ function SearchItem({ game }) {
 }
 
 export default function Navbar() {
-    const { user } = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const navigate = useNavigate();
+    const profileRef = useRef(null);
     const searchRef = useRef(null);
+
+    async function handleLogout() {
+        await logout();
+        navigate("/");
+    }
 
     useEffect(() => {
         function handleClickOutside(event) {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
                 setResults([]);
                 setQuery("");
+            }
+            if (profileRef.current && !profileRef.current.contains(event.target)) {
+                setIsMenuOpen(false);
             }
         }
 
@@ -105,13 +116,13 @@ export default function Navbar() {
                 <div className="ml-auto flex items-center gap-3">
                     <div ref={searchRef} className="relative hidden w-[380px] md:flex flex-col">
                         <div className="flex items-center gap-2 rounded-full bg-white/[0.04] px-4 py-2 ring-1 ring-white/10 focus-within:ring-violet-400/40">
-                            <Search className="h-4 w-4 text-white/40" />
                             <input
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Pesquisar"
+                                placeholder="Pesquisar jogo"
                                 className="w-full bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
                             />
+                            <Search className="h-4 w-4 text-white/40" />
                         </div>
 
                         {query && (
@@ -131,19 +142,39 @@ export default function Navbar() {
                         )}
                     </div>
                     {user ? (
-                        <NavItem to="/profile">
+                        <div ref={profileRef} className="relative">
                             <button
-                                type="button"
+                                onClick={() => setIsMenuOpen((prev) => !prev)}
                                 className="h-10 w-10 overflow-hidden rounded-full ring-1 ring-white/10 hover:ring-white/20"
-                                aria-label="Perfil"
                             >
                                 <img
                                     src={user.steamId ? user.avatar : profileImg}
                                     alt="profile"
-                                    className=" rounded-full"
+                                    className="rounded-full"
                                 />
                             </button>
-                        </NavItem>
+
+                            {isMenuOpen && (
+                                <div className="absolute right-0 mt-2 w-40 rounded-xl bg-[#1b2838] shadow-lg ring-1 ring-white/10 z-50 overflow-hidden">
+                                    <button
+                                        onClick={() => {
+                                            navigate("/profile");
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10"
+                                    >
+                                        Meu perfil
+                                    </button>
+
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                                    >
+                                        Sair
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     ) : (
                         <NavItem to="/login">
                             <button className="py-2 px-4 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/10 hover:opacity-95 active:opacity-90">
