@@ -2,14 +2,14 @@ import AppLayout from "../layouts/AppLayout";
 import { backgrounds } from "../utils/imagesBg";
 import profileImg from "../assets/img-profile/image-profile.avif";
 import { useEffect, useContext, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { Settings } from "lucide-react";
 import { formatCompactNumber } from "../utils/dataChanges";
 import { getMyTopGames, getMyFavorites } from "../services/profileService";
 import FavoriteCard from "../components/game/FavoriteCard";
 import TopGamesCard from "../components/TopGamesCard";
 import { linkSteamAccount } from "../services/authService";
+import { toggleFavorite } from "../services/gameService";
+import Modal from "../components/Modal";
 
 function Stat({ title, value, subtitle }) {
     return (
@@ -23,30 +23,25 @@ function Stat({ title, value, subtitle }) {
 }
 
 export default function Profile() {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showAllTopGames, setShowAllTopGames] = useState(false);
     const [showAllFavoriteGames, setShowAllFavoriteGames] = useState(false);
     const [favorites, setFavorites] = useState([]);
     const [topGames, setTopGames] = useState([]);
     const [loadingFavorites, setLoadingFavorites] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedGame, setSelectedGame] = useState(null);
     const [currentBg, setCurrentBg] = useState(backgrounds[0]);
     const [selectedBg, setSelectedBg] = useState(backgrounds[0]);
 
     const dropdownRef = useRef(null);
-    const menuRef = useRef(null);
-    const { user, logout } = useContext(AuthContext);
-    const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
 
     useEffect(() => {
         function handleClickOutside(e) {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setIsOpen(false);
                 setSelectedBg(currentBg);
-            }
-
-            if (menuRef.current && !menuRef.current.contains(e.target)) {
-                setIsMenuOpen(false);
             }
         }
 
@@ -75,16 +70,6 @@ export default function Profile() {
         0,
     );
 
-    function toggleMenu() {
-        setIsMenuOpen((prev) => !prev);
-        setIsOpen(false);
-    }
-
-    async function handleLogout() {
-        await logout();
-        navigate("/");
-    }
-
     if (!user) {
         return (
             <AppLayout>
@@ -104,6 +89,15 @@ export default function Profile() {
         } finally {
             setLoadingFavorites(false);
         }
+    }
+
+    async function handleConfirmRemove() {
+        if (!selectedGame) return;
+
+        await toggleFavorite(selectedGame.appid, setFavorites);
+
+        setIsModalOpen(false);
+        setSelectedGame(null);
     }
 
     useEffect(() => {
@@ -187,25 +181,6 @@ export default function Profile() {
                                 >
                                     Editar perfil
                                 </button>
-
-                                <div ref={menuRef} className="relative flex items-center gap-2">
-                                    <button
-                                        onClick={toggleMenu}
-                                        className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center"
-                                    >
-                                        <Settings className="h-5" />
-                                    </button>
-                                    {isMenuOpen && (
-                                        <div className="  rounded-xl bg-[#1b2838] shadow-lg ring-1 ring-white/10 z-50 hover:bg-red-900">
-                                            <button
-                                                onClick={handleLogout}
-                                                className="w-full rounded-xl px-5 py-1 text-xs text-white"
-                                            >
-                                                Sair
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -390,7 +365,10 @@ export default function Profile() {
                         <FavoriteCard
                             appid={fav.appid}
                             game={fav.gameDetails}
-                            setFavorites={setFavorites}
+                            onRemove={(gameData) => {
+                                setSelectedGame(gameData);
+                                setIsModalOpen(true);
+                            }}
                         />
                     ))}
 
@@ -402,6 +380,44 @@ export default function Profile() {
                     )}
                 </div>
             </div>
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div
+                        onClick={() => setIsModalOpen(false)}
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                    />
+
+                    <div className="relative z-10 w-full max-w-sm rounded-2xl bg-[#1b2838] p-6 ring-1 ring-white/10 shadow-xl">
+                        <h2 className="text-white text-lg font-semibold mb-2">
+                            Remover dos favoritos
+                        </h2>
+
+                        <p className="text-sm text-white/60 mb-6">
+                            Tem certeza que deseja remover{" "}
+                            <span className="text-white font-medium">
+                                {selectedGame?.game?.name}
+                            </span>{" "}
+                            da sua lista de favoritos?
+                        </p>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="flex-1 rounded-lg bg-white/5 py-2 text-white hover:bg-white/10"
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                onClick={handleConfirmRemove}
+                                className="flex-1 rounded-lg bg-red-500 py-2 text-white hover:bg-red-600"
+                            >
+                                Remover
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </Modal>
         </AppLayout>
     );
 }

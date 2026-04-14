@@ -230,7 +230,9 @@ export default function Ranking() {
                                 <span className="text-white/60 text-sm">
                                     {formatDate(game.release_date)}
                                 </span>
-                                <span className="text-white text-sm">{game.price}</span>
+                                <span className="text-white text-sm">
+                                    {game.price == "Free to Play" ? "Gratuito" : game.price}
+                                </span>
 
                                 <button
                                     type="button"

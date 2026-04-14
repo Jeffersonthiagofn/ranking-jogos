@@ -37,10 +37,9 @@ export default function Register() {
             setLoading(true);
             const message = await registerUser(name, email, password);
             setSuccessMessage(message || "Cadastro realizado com sucesso.");
-            await login(email, password);
 
             setTimeout(() => {
-                navigate("/");
+                navigate("/login");
             }, 1500);
         } catch (err) {
             setError(err.message || "Não foi possível realizar o cadastro.");

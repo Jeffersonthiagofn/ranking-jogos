@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { Trash2 } from "lucide-react";
-import { toggleFavorite } from "../../services/gameService";
+import { Heart, HeartCrack } from "lucide-react";
 
-export default function FavoriteCard({ appid, game, setFavorites }) {
+export default function FavoriteCard({ appid, game, onRemove }) {
     const navigate = useNavigate();
     if (!game) return null;
 
@@ -25,11 +24,13 @@ export default function FavoriteCard({ appid, game, setFavorites }) {
             <div
                 onClick={(e) => {
                     e.stopPropagation();
-                    toggleFavorite(appid, setFavorites);
+                    onRemove({ appid, game });
                 }}
-                className="absolute top-1 right-0.5 h-6 w-6 text-red-500 flex items-center justify-center rounded-full hover:bg-white/10 p-0.5"
+                className="absolute top-1 right-1 h-6 w-6 flex items-center justify-center rounded-full hover:bg-white/10 p-0.5"
             >
-                <Trash2 className="h-4" />
+                {/* <Heart className="absolute inset-0 group-hover:hidden h-6  text-violet-300 rounded-full " />
+                <HeartCrack className="absolute inset-0 hidden group-hover:block h-6 text-violet-300 rounded-full" /> */}
+                <Heart className="h-6 fill-violet-400 text-violet-300" />
             </div>
         </div>
     );
