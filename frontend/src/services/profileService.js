@@ -36,3 +36,17 @@ export async function getMyTopGames() {
     const data = await graphqlRequest(query);
     return data.getMyTopGames;
 }
+
+export async function updateBgProfile(bgId) {
+    const query = `
+        mutation($bgId: Int!) {
+            updateBgProfile(bgId: $bgId) {
+                id
+                bgProfile
+            }
+        }
+    `;
+
+    const data = await graphqlRequest(query, { bgId });
+    return data.updateBgProfile;
+}

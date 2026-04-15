@@ -1,4 +1,5 @@
 import { Gamepad2, ShieldCheck } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 export default function AuthLayout({ title, subtitle, children, heroImage, brand = "GameRank" }) {
     return (
@@ -15,12 +16,16 @@ export default function AuthLayout({ title, subtitle, children, heroImage, brand
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.28),transparent_55%)]" />
 
                     <div className="relative flex h-full flex-col justify-between p-10">
-                        <div className="flex items-center gap-2 text-white/90">
-                            <div className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 ring-1 ring-white/10">
-                                <Gamepad2 className="h-5 w-5 text-violet-300" />
+                        <NavLink to="/">
+                            <div className="cursor-pointer flex items-center gap-2">
+                                <div className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 ring-1 ring-white/10">
+                                    <img className="h-6" src="/icon-gamerank.svg" alt="" />
+                                </div>
+                                <span className="text-sm font-semibold text-white/90">
+                                    GameRank
+                                </span>
                             </div>
-                            <span className="text-lg font-semibold">{brand}</span>
-                        </div>
+                        </NavLink>
 
                         <div className="flex flex-1 items-center">
                             <div className="max-w-xl">

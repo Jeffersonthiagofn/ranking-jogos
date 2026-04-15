@@ -48,7 +48,7 @@ export default function Login() {
             await login(email, password);
             navigate("/");
         } catch (err) {
-            setError(err.message || "Não foi possível fazer login.");
+            setError("Não foi possível fazer login.");
         } finally {
             setLoading(false);
         }

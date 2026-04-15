@@ -378,5 +378,22 @@ export const resolvers = {
 
             return user.favorites;
         },
+
+        updateBgProfile: async (_, { bgId }, context) => {
+            if (!context.user) {
+                throw new Error("Not authenticated");
+            }
+
+            const user = await User.findById(context.user.id);
+
+            if (!user) {
+                throw new Error("User not found");
+            }
+
+            user.bgProfile = bgId;
+            await user.save();
+
+            return user;
+        },
     },
 };

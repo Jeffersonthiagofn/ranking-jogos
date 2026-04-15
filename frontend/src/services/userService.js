@@ -6,6 +6,8 @@ export async function getMe() {
             getMe {
             id
             name
+            avatar
+            bgProfile
             steamId
             steamLevel
             steamXp
