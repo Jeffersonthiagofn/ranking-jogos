@@ -115,7 +115,7 @@ export default function GameDetails() {
 
                         <div className="mt-6 flex items-center gap-5">
                             <div className="text-lg font-semibold text-white">
-                                {game.is_free ? "Free to Play" : game.price || "—"}
+                                {game.is_free ? "Gratuito" : game.price || "—"}
                             </div>
 
                             <button

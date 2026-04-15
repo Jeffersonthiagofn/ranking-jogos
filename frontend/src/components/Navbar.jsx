@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useContext } from "react";
 import { searchGames } from "../services/searchService";
 import { AuthContext } from "../context/AuthContext";
 import profileImg from "../assets/img-profile/image-profile.avif";
+import { formatDate } from "../utils/dataChanges";
 
 function NavItem({ to, children }) {
     return (
@@ -34,7 +35,7 @@ function SearchItem({ game }) {
             <div className="flex flex-col min-w-0">
                 <span className="truncate text-sm text-white">{game.name}</span>
                 <span className="text-xs text-white/50">
-                    {game.is_free ? "Free to Play" : game.price || "—"}
+                    {game.is_free ? "Gratuito" : game.price || "—"}
                 </span>
             </div>
         </div>
