@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/app.js",
-  "scripts": {
+"scripts": {
     "start": "node src/app.js",
+    "worker": "node src/worker.js", 
+    "dev": "nodemon src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
