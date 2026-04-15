@@ -34,13 +34,13 @@ export default function Register() {
         try {
             setLoading(true);
             const message = await registerUser(name, email, password);
-            setSuccessMessage(message || "Cadastro realizado com sucesso.");
+            setSuccessMessage("Cadastro realizado com sucesso.");
 
             setTimeout(() => {
                 navigate("/login");
             }, 1500);
         } catch (err) {
-            setError(err.message || "Não foi possível realizar o cadastro.");
+            setError("Não foi possível realizar o cadastro.");
         } finally {
             setLoading(false);
         }
