@@ -43,7 +43,7 @@ export const loginWithSteam = () => {
 export const linkSteamAccount = () => {
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-    window.location.href = `${backendUrl}/auth/steam?token=${token}`;
+    window.location.href = `${backendUrl}/auth/steam`;
 };
 
 export async function toggleFavoriteRequest(appid) {
