@@ -1,6 +1,5 @@
 import express from "express";
 import mongoose from "mongoose";
-import cron from "node-cron";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
@@ -10,19 +9,15 @@ import { typeDefs } from "./graphql/typeDefs.js";
 import { resolvers } from "./graphql/resolvers.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import steamAuthRoutes from "./routes/steamAuth.js";
-import { updateGameDetails, queueStaleGames, autoIngestIfEmpty } from "./services/steamService.js";
-import User from "./models/User.js";
 
 const app = express();
+const PORT = process.env.PORT || 8080;
 
-const PORT = process.env.PORT || 3000;
+app.use(cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true, 
+}));
 
-app.use(
-    cors({
-        origin: "http://localhost:5173",
-        credentials: true,
-    }),
-);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -43,14 +38,14 @@ if (!url) {
 mongoose
     .connect(url)
     .then(async () => {
-        console.log("Successfully connected to MongoDB");
+        console.log("API Server connected to MongoDB");
 
         await server.start();
 
         app.use(
             "/graphql",
             expressMiddleware(server, {
-                context: ({ req, res }) => {
+                context: async ({ req, res }) => {
                     let token = req.headers.authorization?.split(" ")[1];
                     
                     if (!token && req.cookies && req.cookies.auth_token) {
@@ -58,36 +53,22 @@ mongoose
                     }
 
                     if (!token) {
-                        return { user: null }; 
+                        return { user: null, res };
                     }
 
                     try {
                         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                        return { user: decoded };
+                        return { user: decoded, res };
                     } catch (err) {
-                        return { user: null };
+                        return { user: null, res };
                     }
                 },
             }),
         );
 
         app.listen(PORT, () => {
-            console.log(`Server is awake and actively listening on port ${PORT}`);
+            console.log(`API Server is awake and actively listening on port ${PORT}`);
             console.log(`GraphQL Sandbox is ready at http://localhost:${PORT}/graphql`);
         });
-
-        await autoIngestIfEmpty();
-        console.log("Server started! Running initial game detail update...");
-        updateGameDetails();
     })
     .catch((err) => console.error("Database connection error:", err));
-
-cron.schedule("*/2 * * * *", () => {
-    console.log("Cron triggered: Fetching the next batch of games...");
-    updateGameDetails();
-});
-
-cron.schedule("0 3 * * *", () => {
-    console.log("Running daily sweep for stale games...");
-    queueStaleGames();
-});
