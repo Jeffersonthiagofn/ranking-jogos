@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Heart, HeartCrack, HeartOff, Ban } from "lucide-react";
 import mynaui_heart_crack from "../../assets/mynaui_heart_crack.svg";
 import mynaui_heart from "../../assets/mynaui_heart.svg";
 
@@ -30,20 +29,6 @@ export default function FavoriteCard({ appid, game, onRemove }) {
                 }}
                 className="absolute top-1 right-1 h-6 w-6 flex items-center justify-center rounded-full"
             >
-                {/* Opção */}
-                {/* <HeartOff className="h-6 text-red-500" /> */}
-
-                {/* Opção  */}
-                {/* <Ban className="h-6 text-red-500" /> */}
-
-                {/* Opção  */}
-                {/* <Heart className="h-6 fill-violet-400 text-violet-300" /> */}
-
-                {/* Opção  */}
-                {/* <Heart className="absolute inset-0 group-hover:hidden h-6  fill-violet-400 text-violet-300 rounded-full " />
-                <HeartOff className="absolute inset-0 hidden group-hover:block h-6 fill-violet-400 text-violet-300 rounded-full" /> */}
-
-                {/* Opção  */}
                 <img
                     src={mynaui_heart}
                     className="absolute inset-0 group-hover:hidden h-6  fill-violet-400 text-violet-300 rounded-full "
@@ -52,10 +37,6 @@ export default function FavoriteCard({ appid, game, onRemove }) {
                     src={mynaui_heart_crack}
                     className="absolute inset-0 hidden group-hover:block h-6 fill-violet-400 text-violet-300 rounded-full"
                 />
-
-                {/* Opção  */}
-                {/* <Heart className="absolute inset-0 group-hover:hidden h-6   text-violet-300 rounded-full " />
-                <HeartOff className="absolute inset-0 hidden group-hover:block h-6  text-violet-300 rounded-full" /> */}
             </div>
         </div>
     );
