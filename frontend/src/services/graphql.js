@@ -1,13 +1,10 @@
 const GRAPHQL_URL = import.meta.env.VITE_GRAPHQL_URL || "http://localhost:8080/graphql";
 
 export async function graphqlRequest(query, variables = {}, options = {}) {
-    const token = localStorage.getItem("token");
-
     const response = await fetch(GRAPHQL_URL, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         credentials: "include",
         body: JSON.stringify({

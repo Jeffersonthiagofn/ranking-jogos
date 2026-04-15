@@ -21,8 +21,6 @@ export const logoutUser = async () => {
         method: "POST",
         credentials: "include",
     });
-
-    localStorage.removeItem("token");
 };
 
 export async function registerUser(name, email, password) {
@@ -44,7 +42,6 @@ export const loginWithSteam = () => {
 
 export const linkSteamAccount = () => {
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
-    const token = localStorage.getItem("token");
 
     window.location.href = `${backendUrl}/auth/steam?token=${token}`;
 };

@@ -301,7 +301,7 @@ export const resolvers = {
     },
 
     Mutation: {
-        login: async (_, { email, password }) => {
+    login: async (_, { email, password }, { res }) => {
             const user = await User.findOne({ email });
             if (!user) {
                 throw new Error("User not found");
@@ -316,9 +316,15 @@ export const resolvers = {
                 expiresIn: "1h",
             });
 
+            res.cookie("auth_token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: 60 * 60 * 1000,
+            });
+
             return {
                 msg: "Login successful!",
-                token: token,
             };
         },
 
@@ -338,6 +344,7 @@ export const resolvers = {
             });
 
             await newUser.save();
+            
             return "User registered successfully!";
         },
 
@@ -347,10 +354,9 @@ export const resolvers = {
             const user = await User.findById(context.user.id);
             if (!user.steamId) throw new Error("No Steam account linked!");
 
-            // Call the shared function, and pass true to BYPASS the cooldown!
             await syncSteamDataToUser(user, user.steamId, true);
 
-            await user.save(); // Save the mutations to the database
+            await user.save();
 
             return user.ownedGames;
         },
