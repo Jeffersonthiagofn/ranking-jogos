@@ -41,21 +41,21 @@ The development process involved two main stages:
   <tr>
     <td align="center">
       <a href="https://github.com/Destroier650">
-        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="60" alt="Alef GitHub"/>
+        <img src="https://media.licdn.com/dms/image/v2/D5603AQHkpIrpVvr3gQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1719072842205?e=1778112000&v=beta&t=IuITseJHuDtXytnfui7ilIm-NxyIfm6f3sORg_MsmEE" width="60" alt="Alef GitHub"/>
         <br />
         <strong>Alef Emanuel</strong>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/Jeffersonthiagofn">
-        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="60" alt="Jefferson GitHub"/>
+        <img src="https://avatars.githubusercontent.com/u/126491224?v=4" width="60" alt="Jefferson GitHub"/>
         <br />
         <strong>Jefferson Thiago</strong>
       </a>
     </td>
         <td align="center">
       <a href="https://github.com/Nikson-silva">
-        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="60" alt="Nikson GitHub"/>
+        <img src="https://avatars.githubusercontent.com/u/229480885?v=4" width="60" alt="Nikson GitHub"/>
         <br />
         <strong>Nikson Silva</strong>
       </a>
