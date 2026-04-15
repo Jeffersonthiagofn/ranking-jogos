@@ -15,6 +15,7 @@ export function AuthProvider({ children }) {
                         id
                         name
                         avatar
+                        bgProfile
                         steamId
                         steamLevel
                         steamXp
@@ -66,7 +67,7 @@ export function AuthProvider({ children }) {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, fetchMe }}>
+        <AuthContext.Provider value={{ user, setUser, loading, login, logout, fetchMe }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User } from "lucide-react";
 
@@ -7,11 +7,9 @@ import TextField from "../components/TextField";
 import GradientButton from "../components/GradientButton";
 import { registerUser } from "../services/authService";
 import heroImg from "../assets/login-hero.png";
-import { AuthContext } from "../context/AuthContext";
 
 export default function Register() {
     const navigate = useNavigate();
-    const { login } = useContext(AuthContext);
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");

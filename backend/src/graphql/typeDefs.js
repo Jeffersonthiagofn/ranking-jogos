@@ -55,6 +55,7 @@ type User {
   email: String
   steamId: String
   avatar: String
+  bgProfile: Int
   steamLevel: Int
   steamXp: Int
   steamXpNeeded: Int
@@ -93,5 +94,6 @@ type Mutation {
   login(email: String!, password: String!): AuthPayload
   syncMyLibrary: [OwnedGame]
   toggleFavorite(appid: Int!): [Favorite]
+  updateBgProfile(bgId: Int!): User
 }
 `;

@@ -33,6 +33,8 @@ const UserSchema = new mongoose.Schema({
 
     avatar: String,
 
+    bgProfile: { type: Number, default: 0 },
+
     steamLevel: { type: Number, default: 0 },
     steamXp: { type: Number, default: 0 },
     steamXpNeeded: { type: Number, default: 0 },
@@ -43,12 +45,14 @@ const UserSchema = new mongoose.Schema({
             playtime_forever: { type: Number, default: 0 },
             completed_achievements: { type: Number, default: 0 },
             total_achievements: { type: Number, default: 0 },
-            achievements: [{ 
-                name: String,
-                description: String,
-                icon: String,
-                completion_percentage: Number
-            }],
+            achievements: [
+                {
+                    name: String,
+                    description: String,
+                    icon: String,
+                    completion_percentage: Number,
+                },
+            ],
         },
     ],
 

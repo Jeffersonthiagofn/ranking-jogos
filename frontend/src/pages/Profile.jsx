@@ -9,6 +9,7 @@ import FavoriteCard from "../components/game/FavoriteCard";
 import TopGamesCard from "../components/TopGamesCard";
 import { linkSteamAccount } from "../services/authService";
 import { toggleFavorite } from "../services/gameService";
+import { updateBgProfile } from "../services/profileService";
 import Modal from "../components/Modal";
 
 function Stat({ title, value, subtitle }) {
@@ -23,6 +24,7 @@ function Stat({ title, value, subtitle }) {
 }
 
 export default function Profile() {
+    const { user, setUser } = useContext(AuthContext);
     const [showAllTopGames, setShowAllTopGames] = useState(false);
     const [showAllFavoriteGames, setShowAllFavoriteGames] = useState(false);
     const [favorites, setFavorites] = useState([]);
@@ -31,11 +33,23 @@ export default function Profile() {
     const [isOpen, setIsOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedGame, setSelectedGame] = useState(null);
-    const [currentBg, setCurrentBg] = useState(backgrounds[0]);
+    const [currentBg, setCurrentBg] = useState(() => {
+        if (user?.bgProfile === undefined || user?.bgProfile === null) {
+            return backgrounds[0];
+        }
+
+        return backgrounds.find((bg) => bg.id === user.bgProfile) || backgrounds[0];
+    });
     const [selectedBg, setSelectedBg] = useState(backgrounds[0]);
 
     const dropdownRef = useRef(null);
-    const { user } = useContext(AuthContext);
+
+    useEffect(() => {
+        if (user?.bgProfile === undefined) return;
+
+        const bg = backgrounds.find((b) => b.id === user.bgProfile);
+        if (bg) setCurrentBg(bg);
+    }, [user]);
 
     useEffect(() => {
         function handleClickOutside(e) {
@@ -210,7 +224,6 @@ export default function Profile() {
                                 ))}
                             </div>
 
-                            {/* BOTÕES */}
                             <div className="flex justify-end gap-3 mt-5">
                                 <button
                                     onClick={() => {
@@ -224,9 +237,20 @@ export default function Profile() {
 
                                 <button
                                     disabled={selectedBg.name === currentBg.name}
-                                    onClick={() => {
-                                        setCurrentBg(selectedBg);
-                                        setIsOpen(false);
+                                    onClick={async () => {
+                                        try {
+                                            await updateBgProfile(selectedBg.id);
+
+                                            setUser((prev) => ({
+                                                ...prev,
+                                                bgProfile: selectedBg.id,
+                                            }));
+
+                                            setCurrentBg(selectedBg);
+                                            setIsOpen(false);
+                                        } catch (err) {
+                                            console.error("Erro ao salvar background:", err);
+                                        }
                                     }}
                                     className={`rounded-lg py-2 px-3 text-white ${
                                         selectedBg.name === currentBg.name
