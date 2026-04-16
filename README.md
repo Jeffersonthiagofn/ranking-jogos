@@ -62,4 +62,3 @@ The development process involved two main stages:
     </td>
   </tr>
 </table>
----

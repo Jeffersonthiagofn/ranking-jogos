@@ -19,8 +19,6 @@ A full-stack application designed to build a Steam games ranking based on a loca
 - [Authentication Flow and Steam Integration](#authentication-flow-and-steam-integration)
 - [Data Operations and Ingestion](#data-operations-and-ingestion)
 - [GraphQL](#graphql)
-- [README Media Section](#readme-media-section)
-- [Future Improvements](#future-improvements)
 
 ---
 

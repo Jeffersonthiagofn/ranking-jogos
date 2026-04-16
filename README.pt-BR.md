@@ -19,8 +19,6 @@ Aplicação full stack para construir um ranking de jogos da Steam a partir de u
 - [Fluxo de autenticação e integração com Steam](#fluxo-de-autenticação-e-integração-com-steam)
 - [Operações de dados e ingestão](#operações-de-dados-e-ingestão)
 - [GraphQL](#graphql)
-- [Seção de mídia no README](#seção-de-mídia-no-readme)
-- [Melhorias futuras](#melhorias-futuras)
 
 ---
 
